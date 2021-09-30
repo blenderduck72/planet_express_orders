@@ -7,7 +7,7 @@ from ksuid import ksuid
 
 from src.constants import TABLE_NAME
 from src.dynamodb.helpers import put_item
-from src.dynamodb.ModelFactory import CustomerFactory
+from src.dynamodb.ModelFactory import CustomerFactory, OrderFactory
 
 
 @pytest.fixture(scope="session")
@@ -68,12 +68,13 @@ def customer_data_dict(customer_ddb_dict: dict) -> dict:
 @pytest.fixture
 def order_ddb_dict() -> dict:
     id_ksuid: ksuid = ksuid()
-    pk_value: str = f"Order#{str(id_ksuid)}"
+    pk_value: str = f"{OrderFactory.PK_ENTITY}#{str(id_ksuid)}"
 
     return {
         "pk": pk_value,
         "sk": pk_value,
         "id": str(id_ksuid),
+        "entity": OrderFactory.PK_ENTITY,
         "customer_email": "zapp.brannigan@decomcraticorderofplanets.com",
         "delivery_address": {
             "line1": "471 1st Street Ct",
@@ -82,8 +83,18 @@ def order_ddb_dict() -> dict:
             "state": "IL",
             "zipcode": "60603",
         },
-        "datetime_created": id_ksuid.getDatetime().strftime("%Y-%m-%d %H:%M:%S %Z"),
+        "datetime_created": id_ksuid.getDatetime().strftime("%Y-%m-%dT%H:%M:%SZ"),
     }
+
+
+@pytest.fixture
+def order_data_dict(order_ddb_dict: dict) -> dict:
+    order_data: dict = deepcopy(order_ddb_dict)
+    order_data.pop("pk")
+    order_data.pop("sk")
+    order_data.pop("entity")
+
+    return order_data
 
 
 @pytest.fixture
