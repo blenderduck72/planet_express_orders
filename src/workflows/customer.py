@@ -4,7 +4,6 @@ import boto3
 
 from src.constants import TABLE_NAME
 from src.models.customer import Customer
-from src.models.order import Order
 from src.dynamodb.ModelFactory import CustomerFactory
 from src.workflows.workflow_exceptions import CreateWorkflowException
 
@@ -18,15 +17,14 @@ def create_customer(
     """
     new_customer_data["date_created"] = datetime.now().date().isoformat()
 
-    customer: Customer = CustomerFactory.item_to_model(new_customer_data)
-    CustomerFactory.model_to_item(customer)
+    customer_factory: CustomerFactory = CustomerFactory(new_customer_data)
 
     client = boto3.resource("dynamodb")
     table = client.Table(TABLE_NAME)
 
     try:
         table.put_item(
-            Item=CustomerFactory.model_to_item(customer),
+            Item=customer_factory.item,
             ConditionExpression="attribute_not_exists(#username)",
             ExpressionAttributeNames={
                 "#username": "username",
@@ -36,10 +34,4 @@ def create_customer(
     except client.meta.client.exceptions.ConditionalCheckFailedException as e:
         raise CreateWorkflowException("Account already exists")
 
-    return customer
-
-
-def create_order(new_order_data: dict) -> Order:
-    """
-    Accepts a new Order Payload
-    """
+    return customer_factory.model

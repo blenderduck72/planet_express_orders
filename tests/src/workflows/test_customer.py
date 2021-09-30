@@ -2,6 +2,7 @@ from copy import deepcopy
 
 import pytest
 
+from src.dynamodb.helpers import get_item
 from src.dynamodb.ModelFactory import CustomerFactory
 from src.models.customer import Customer
 from src.workflows.customer import create_customer
@@ -10,13 +11,16 @@ from src.workflows.workflow_exceptions import CreateWorkflowException
 
 class TestCreateCustomer:
     def test_create_customer_succeeds(
-        self, customer_data_dict: dict, customer_ddb_dict: dict
+        self,
+        customer_data_dict: dict,
+        customer_ddb_dict: dict,
     ):
         new_customer_data: dict = deepcopy(customer_data_dict)
+        customer_factory: CustomerFactory = CustomerFactory(customer_data_dict)
         new_customer_data.pop("date_created")
 
-        customer: Customer = create_customer(customer_data_dict)
-        fetched_customer: dict = CustomerFactory.get_item_dict_by_model(customer)
+        create_customer(customer_data_dict)
+        fetched_customer: dict = get_item(customer_factory.key)
 
         assert fetched_customer
         fetched_customer.pop("date_created")

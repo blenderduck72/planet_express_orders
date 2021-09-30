@@ -22,7 +22,4 @@ class DynamoOrder(BaseModel):
 
 
 class Order(DynamoOrder):
-    id: str
-    customer_email: str
-    datetime_created: datetime
     line_item: List[LineItem] = []
