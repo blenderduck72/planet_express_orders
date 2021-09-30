@@ -1,0 +1,21 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+pydantic = {extras = ["email"], version = "*"}
+boto3 = "*"
+ksuid = "*"
+marshmallow = "*"
+simplejson = "*"
+
+[dev-packages]
+pytest = "*"
+pytest-mock = "*"
+pytest-envfiles = "*"
+moto = {extras = ["events", "sqs"], version = "*"}
+jsonschema = "*"
+
+[requires]
+python_version = "3.8"

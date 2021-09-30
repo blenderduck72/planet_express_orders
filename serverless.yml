@@ -1,0 +1,67 @@
+org: darinedward72
+app: planet-express-orders
+service: planet-express-orders
+
+frameworkVersion: '2'
+
+
+provider:
+  name: aws
+  runtime: python3.8
+  lambdaHashingVersion: 20201221
+  stage: dev
+  region: us-east-2
+  environment:
+    PLNT_EXPRESS_TBL: planet_express_orders
+    
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:Query
+            - dynamodb:UpdateItem
+          Resource:
+            Fn::GetAtt:
+              - PlanetExpressDB
+              - Arn
+package:
+  patterns:
+    - "!**/**"
+    - "src/**"
+
+functions:
+  hello:
+    handler: src.handler.hello
+
+custom:
+  pythonRequirements:
+    usePipenv: true
+    dockerizePip: non-linux
+    dockerImage: lambci/lambda:build-python3.8
+    dockerSsh: true
+
+resources:
+  Resources:
+    PlanetExpressDB:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: planet_express_table
+        KeySchema:
+          - AttributeName: pk
+            KeyType: HASH
+          - AttributeName: sk
+            KeyType: RANGE
+        AttributeDefinitions:
+          - AttributeName: pk
+            AttributeType: S
+          - AttributeName: sk
+            AttributeType: S
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+
+plugins:
+  - serverless-python-requirements
