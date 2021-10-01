@@ -7,3 +7,6 @@ class TestOrder:
         order_data_dict: dict,
     ):
         order: Order = Order(**order_data_dict)
+        import pdb
+
+        pdb.set_trace()

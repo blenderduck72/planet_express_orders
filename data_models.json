@@ -1,0 +1,166 @@
+[
+    {
+        "title": "Customer",
+        "type": "object",
+        "properties": {
+            "email": {
+                "title": "Email",
+                "type": "string",
+                "format": "email"
+            },
+            "first_name": {
+                "title": "First Name",
+                "type": "string"
+            },
+            "last_name": {
+                "title": "Last Name",
+                "type": "string"
+            },
+            "username": {
+                "title": "Username",
+                "type": "string"
+            },
+            "date_created": {
+                "title": "Date Created",
+                "type": "string",
+                "format": "date"
+            }
+        },
+        "required": [
+            "email",
+            "first_name",
+            "last_name",
+            "username",
+            "date_created"
+        ]
+    },
+    {
+        "title": "Order",
+        "type": "object",
+        "properties": {
+            "id": {
+                "title": "Id",
+                "type": "string"
+            },
+            "customer_email": {
+                "title": "Customer Email",
+                "description": "Customer's email.",
+                "type": "string"
+            },
+            "datetime_created": {
+                "title": "Datetime Created",
+                "description": "Date the Order is created.",
+                "type": "string",
+                "format": "date-time"
+            },
+            "delivery_address": {
+                "title": "Delivery Address",
+                "default": "Customer's delivery address.",
+                "allOf": [
+                    {
+                        "$ref": "#/definitions/DeliveryAddress"
+                    }
+                ]
+            },
+            "status": {
+                "description": "Order's current status.",
+                "allOf": [
+                    {
+                        "$ref": "#/definitions/OrderStatus"
+                    }
+                ]
+            },
+            "line_item": {
+                "title": "Line Item",
+                "description": "Line items associated with an Order.",
+                "default": [],
+                "type": "array",
+                "items": {
+                    "$ref": "#/definitions/LineItem"
+                }
+            }
+        },
+        "required": [
+            "id",
+            "customer_email",
+            "datetime_created",
+            "status"
+        ],
+        "definitions": {
+            "DeliveryAddress": {
+                "title": "DeliveryAddress",
+                "type": "object",
+                "properties": {
+                    "line1": {
+                        "title": "Line1",
+                        "type": "string"
+                    },
+                    "line2": {
+                        "title": "Line2",
+                        "type": "string"
+                    },
+                    "city": {
+                        "title": "City",
+                        "type": "string"
+                    },
+                    "state": {
+                        "title": "State",
+                        "type": "string"
+                    },
+                    "zipcode": {
+                        "title": "Zipcode",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "line1",
+                    "city",
+                    "state",
+                    "zipcode"
+                ]
+            },
+            "OrderStatus": {
+                "title": "OrderStatus",
+                "description": "An enumeration.",
+                "enum": [
+                    "new",
+                    "submitted",
+                    "in_progress",
+                    "fuliflled",
+                    "shipped",
+                    "out_for_delivery",
+                    "delivered"
+                ],
+                "type": "string"
+            },
+            "LineItem": {
+                "title": "LineItem",
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "title": "Id",
+                        "type": "integer"
+                    },
+                    "name": {
+                        "title": "Name",
+                        "type": "string"
+                    },
+                    "description": {
+                        "title": "Description",
+                        "type": "string"
+                    },
+                    "quantity": {
+                        "title": "Quantity",
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "id",
+                    "name",
+                    "description",
+                    "quantity"
+                ]
+            }
+        }
+    }
+]

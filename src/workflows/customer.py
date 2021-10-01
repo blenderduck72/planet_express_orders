@@ -35,3 +35,7 @@ def create_customer(
         raise CreateWorkflowException("Account already exists")
 
     return customer_factory.model
+
+
+def get_customer() -> Customer:
+    pass

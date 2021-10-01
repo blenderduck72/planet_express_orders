@@ -84,6 +84,7 @@ def order_ddb_dict() -> dict:
             "zipcode": "60603",
         },
         "datetime_created": id_ksuid.getDatetime().strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "status": "new",
     }
 
 

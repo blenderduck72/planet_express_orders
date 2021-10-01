@@ -9,6 +9,7 @@ boto3 = "*"
 ksuid = "*"
 marshmallow = "*"
 simplejson = "*"
+click = "*"
 
 [dev-packages]
 pytest = "*"
