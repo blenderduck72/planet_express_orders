@@ -1,5 +1,3 @@
-from copy import deepcopy
-
 import simplejson as json
 
 from pydantic import BaseModel
@@ -11,6 +9,7 @@ class ItemFactory:
     PK_FIELD: str
     SK_FIELD: str
     DDB_MODEL: BaseModel
+    DOMAIN_MODEL: BaseModel
 
     def __init__(
         self,
@@ -73,3 +72,7 @@ class ItemFactory:
             "pk": f"{cls.PK_ENTITY}#{getattr(model, cls.PK_FIELD)}",
             "sk": sk,
         }
+
+    @classmethod
+    def get_domain_model(cls, domain_data: dict) -> BaseModel:
+        return cls.DOMAIN_MODEL(**domain_data)

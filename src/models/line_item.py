@@ -2,7 +2,8 @@ from pydantic import BaseModel
 
 
 class LineItem(BaseModel):
-    id: int
+    id: str
     name: str
     description: str
     quantity: int
+    order_id: str

@@ -1,4 +1,5 @@
 from copy import deepcopy
+from decimal import Decimal
 
 import boto3
 import moto
@@ -7,7 +8,8 @@ from ksuid import ksuid
 
 from src.constants import TABLE_NAME
 from src.dynamodb.helpers import put_item
-from src.dynamodb.ModelFactory import CustomerFactory, OrderFactory
+from src.dynamodb.ModelFactory import CustomerFactory, LineItemFactory, OrderFactory
+from src.models.order import DynamoOrder
 
 
 @pytest.fixture(scope="session")
@@ -85,6 +87,7 @@ def order_ddb_dict() -> dict:
         },
         "datetime_created": id_ksuid.getDatetime().strftime("%Y-%m-%dT%H:%M:%SZ"),
         "status": "new",
+        "item_count": Decimal("0"),
     }
 
 
@@ -105,3 +108,42 @@ def persisted_order_ddb_dict(
     put_item(order_ddb_dict)
 
     return order_ddb_dict
+
+
+@pytest.fixture
+def persisted_dynamo_order(
+    persisted_order_ddb_dict: dict,
+) -> DynamoOrder:
+    return OrderFactory(persisted_order_ddb_dict).model
+
+
+@pytest.fixture
+def line_item_ddb_dict(
+    order_ddb_dict: dict,
+) -> dict:
+    return {
+        "pk": order_ddb_dict["pk"],
+        "sk": f"{LineItemFactory.SK_ENTITY}#01",
+        "entity": LineItemFactory.SK_ENTITY,
+        "id": "01",
+        "name": "Popplers",
+        "description": "Omicronian enities of small proportions.",
+        "quantity": Decimal("100"),
+        "order_id": order_ddb_dict["id"],
+    }
+
+
+@pytest.fixture
+def persisted_line_item_ddb_dict(line_item_ddb_dict: dict) -> dict:
+    put_item(line_item_ddb_dict)
+    return line_item_ddb_dict
+
+
+@pytest.fixture
+def line_item_data_dict(line_item_ddb_dict: dict) -> dict:
+    line_item_data: dict = deepcopy(line_item_ddb_dict)
+    line_item_data.pop("pk")
+    line_item_data.pop("sk")
+    line_item_data.pop("entity")
+
+    return line_item_data
