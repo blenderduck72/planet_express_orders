@@ -52,7 +52,7 @@ class OrderService:
 
         return order_factory.model
 
-    def update_order(self) -> dict:
+    def update_order(self, order_data: dict) -> dict:
         pass
 
     def get_order_item_by_id(
@@ -140,8 +140,15 @@ class OrderService:
                             "TableName": TABLE_NAME,
                             "Key": order_key,
                             "UpdateExpression": "SET #item_count = #item_count - :inc",
-                            "ExpressionAttributeNames": {"#item_count": "item_count"},
-                            "ExpressionAttributeValues": {":inc": 1},
+                            "ExpressionAttributeNames": {
+                                "#item_count": "item_count",
+                                "#status": "status",
+                            },
+                            "ExpressionAttributeValues": {
+                                ":inc": 1,
+                                ":new": OrderStatus.NEW,
+                            },
+                            "ConditionExpression": "#status IN (:new)",
                         },
                     },
                     {
@@ -153,5 +160,5 @@ class OrderService:
                     },
                 ],
             )
-        except client.meta.client.exceptions.ConditionalCheckFailedException:
+        except client.meta.client.exceptions.TransactionCanceledException:
             raise RemoveLineItemException("Unable to remove line_item from Order")

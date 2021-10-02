@@ -7,10 +7,11 @@ import pytest
 from pytest import FixtureRequest
 
 
-from src.dynamodb.helpers import get_item, query_by_key_condition_expression
+from src.dynamodb.helpers import get_item, put_item, query_by_key_condition_expression
 from src.models.order import DynamoOrder, Order, OrderStatus
 from src.dynamodb.ModelFactory import OrderFactory
 from src.services.order_service import OrderService
+from src.services.exceptions import RemoveLineItemException
 
 
 class TestOrderService:
@@ -124,6 +125,23 @@ class TestOrderService:
         self, persisted_order_ddb_dict: dict
     ) -> None:
         order_service: OrderService = OrderService()
-        order_service.remove_line_from_order(
-            order_id=persisted_order_ddb_dict["id"], line_item_id=1
-        )
+
+        with pytest.raises(RemoveLineItemException):
+            order_service.remove_line_from_order(
+                order_id=persisted_order_ddb_dict["id"], line_item_id=1
+            )
+
+    def test_remove_line_item_raises_exception_if_set_status_no_new(
+        self,
+        persisted_order_ddb_dict: dict,
+        persisted_line_item_ddb_dict: dict,
+    ):
+        persisted_order_ddb_dict["status"] = OrderStatus.OUT_FOR_DELIVERY
+        put_item(persisted_order_ddb_dict)
+        order_service: OrderService = OrderService()
+
+        with pytest.raises(RemoveLineItemException):
+            order_service.remove_line_from_order(
+                persisted_order_ddb_dict["id"],
+                persisted_line_item_ddb_dict["id"],
+            )
