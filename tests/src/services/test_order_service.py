@@ -1,4 +1,5 @@
 from copy import deepcopy
+from re import L
 from typing import List
 
 from boto3.dynamodb.conditions import Key
@@ -10,7 +11,6 @@ from src.dynamodb.helpers import get_item, query_by_key_condition_expression
 from src.models.order import DynamoOrder, Order, OrderStatus
 from src.dynamodb.ModelFactory import OrderFactory
 from src.services.order_service import OrderService
-from src.services.exceptions import ServiceCreateItemException
 
 
 class TestOrderService:
@@ -79,7 +79,7 @@ class TestOrderService:
         expected_result: str,
         deserialize: bool,
         persisted_dynamo_order: DynamoOrder,
-    ):
+    ) -> None:
         expected_value = request.getfixturevalue(expected_result)
         client: OrderService = OrderService()
         response = client.get_order_item_by_id(
@@ -89,3 +89,41 @@ class TestOrderService:
 
         assert isinstance(expected_value, expected_type)
         assert response == expected_value
+
+    def test_remove_line_item_from_order(
+        self,
+        persisted_order_ddb_dict: dict,
+        line_item_data_dict: dict,
+    ) -> None:
+        order_service: OrderService = OrderService()
+        line_item: dict = order_service.add_line_item_to_order(
+            order_key={
+                "pk": persisted_order_ddb_dict["pk"],
+                "sk": persisted_order_ddb_dict["pk"],
+            },
+            new_line_item_data=line_item_data_dict,
+        )
+
+        order_service.remove_line_from_order(
+            persisted_order_ddb_dict["id"],
+            line_item["id"],
+        )
+
+        fetched_line_item: dict = get_item(
+            {"pk": line_item["pk"], "sk": line_item["sk"]}
+        )
+
+        assert fetched_line_item is None
+        response: List[dict] = query_by_key_condition_expression(
+            key_condition_expression=Key("pk").eq(persisted_order_ddb_dict["pk"])
+        )
+        assert len(response) == 1
+        assert persisted_order_ddb_dict in response
+
+    def test_remove_line_item_raises_exception_if_no_line_item(
+        self, persisted_order_ddb_dict: dict
+    ) -> None:
+        order_service: OrderService = OrderService()
+        order_service.remove_line_from_order(
+            order_id=persisted_order_ddb_dict["id"], line_item_id=1
+        )

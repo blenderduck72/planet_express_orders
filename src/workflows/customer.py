@@ -31,7 +31,7 @@ def create_customer(
             },
         )
 
-    except client.meta.client.exceptions.ConditionalCheckFailedException as e:
+    except client.meta.client.exceptions.ConditionalCheckFailedException:
         raise CreateWorkflowException("Account already exists")
 
     return customer_factory.model

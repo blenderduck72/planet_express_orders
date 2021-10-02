@@ -1,4 +1,4 @@
-class ServiceCreateItemException(Exception):
+class RemoveLineItemException(Exception):
     """
-    Raised when a service failes to create a DynamoDB item.
+    Raised when a LineItem cannot be removed from an Order
     """

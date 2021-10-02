@@ -9,9 +9,29 @@ from src.constants import TABLE_NAME
 from src.dynamodb.ModelFactory import OrderFactory, LineItemFactory
 from src.dynamodb.helpers import get_item, put_item, query_by_key_condition_expression
 from src.models.order import DynamoOrder, Order, OrderStatus
+from src.services.exceptions import RemoveLineItemException
 
 
 class OrderService:
+    @classmethod
+    def get_order_key_from_id(
+        cls,
+        id: str,
+    ) -> dict:
+        pk_value: str = f"{OrderFactory.PK_ENTITY}#{id}"
+        return {"pk": pk_value, "sk": pk_value}
+
+    @classmethod
+    def get_line_item_key_from_id(
+        self,
+        order_id: str,
+        line_item_id: int,
+    ) -> dict:
+        return {
+            "pk": f"{OrderFactory.PK_ENTITY}#{order_id}",
+            "sk": f"{LineItemFactory.SK_ENTITY}#{str(line_item_id).zfill(2)}",
+        }
+
     def create_order(
         self,
         new_order_data: dict,
@@ -84,7 +104,7 @@ class OrderService:
         self,
         order_key: dict,
         new_line_item_data: dict,
-    ):
+    ) -> dict:
         table = boto3.resource("dynamodb").Table(TABLE_NAME)
         response: dict = table.update_item(
             Key=order_key,
@@ -100,6 +120,38 @@ class OrderService:
         )
         line_item_factory: LineItemFactory = LineItemFactory(new_line_item_data)
         table.put_item(Item=line_item_factory.item)
+        return line_item_factory.item
 
-    def remove_line_from_order(self):
-        pass
+    def remove_line_from_order(
+        self,
+        order_id: str,
+        line_item_id: int,
+    ) -> None:
+        order_key: dict = self.get_order_key_from_id(order_id)
+        line_item_key: dict = self.get_line_item_key_from_id(order_id, line_item_id)
+
+        client = boto3.resource("dynamodb").Table(TABLE_NAME)
+
+        try:
+            client.meta.client.transact_write_items(
+                TransactItems=[
+                    {
+                        "Update": {
+                            "TableName": TABLE_NAME,
+                            "Key": order_key,
+                            "UpdateExpression": "SET #item_count = #item_count - :inc",
+                            "ExpressionAttributeNames": {"#item_count": "item_count"},
+                            "ExpressionAttributeValues": {":inc": 1},
+                        },
+                    },
+                    {
+                        "Delete": {
+                            "TableName": TABLE_NAME,
+                            "Key": line_item_key,
+                            "ConditionExpression": "attribute_exists(sk)",
+                        },
+                    },
+                ],
+            )
+        except client.meta.client.exceptions.ConditionalCheckFailedException:
+            raise RemoveLineItemException("Unable to remove line_item from Order")
