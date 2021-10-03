@@ -1,8 +1,9 @@
 import pytest
 import simplejson as json
 
-from src.handlers import http_create_customer, http_create_order
-from src.models.order import OrderStatus
+from src.handlers import http_create_customer, http_create_order, http_get_domain_order
+from src.models.order import Order, OrderStatus
+from src.services.order_service import OrderService
 
 
 class TestHttpCreateCustomer:
@@ -121,6 +122,22 @@ class TestHttpCreateOrder:
 class TestHttpGetDomainOrder:
     def test_http_get_domain_order(
         self,
-        persisted_order_ddb_dict,
-    ):
-        pass
+        persisted_order_ddb_dict: dict,
+        persisted_line_item_ddb_dict: dict,
+    ) -> None:
+        response: dict = http_get_domain_order(
+            event={
+                "pathParameters": {
+                    "order_id": persisted_order_ddb_dict["id"],
+                }
+            },
+            context=None,
+        )
+
+        order_client: OrderService = OrderService()
+        domain_order: Order = order_client.get_domain_order_by_id(
+            persisted_order_ddb_dict["id"]
+        )
+
+        assert response["statusCode"] == '200'
+        assert response["body"] == domain_order.json()

@@ -35,7 +35,7 @@
         ]
     },
     {
-        "title": "Order",
+        "title": "Domain Order Model",
         "type": "object",
         "properties": {
             "id": {
@@ -70,8 +70,14 @@
                     }
                 ]
             },
-            "line_item": {
-                "title": "Line Item",
+            "item_count": {
+                "title": "Item Count",
+                "description": "Total line items in the order",
+                "default": 0,
+                "type": "integer"
+            },
+            "line_items": {
+                "title": "Line Items",
                 "description": "Line items associated with an Order.",
                 "default": [],
                 "type": "array",
@@ -139,7 +145,7 @@
                 "properties": {
                     "id": {
                         "title": "Id",
-                        "type": "integer"
+                        "type": "string"
                     },
                     "name": {
                         "title": "Name",
@@ -152,13 +158,18 @@
                     "quantity": {
                         "title": "Quantity",
                         "type": "integer"
+                    },
+                    "order_id": {
+                        "title": "Order Id",
+                        "type": "string"
                     }
                 },
                 "required": [
                     "id",
                     "name",
                     "description",
-                    "quantity"
+                    "quantity",
+                    "order_id"
                 ]
             }
         }

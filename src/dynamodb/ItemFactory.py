@@ -87,7 +87,7 @@ class ItemFactory:
     ) -> dict:
         pk: str = f"{cls.PK_ENTITY}#{str(pk_value)}"
 
-        if ItemFactory.SK_ENTITY is None:
+        if cls.SK_ENTITY is None:
             return {"pk": pk, "sk": pk}
 
         if sk_value is None:

@@ -2,12 +2,10 @@ from functools import wraps
 from typing import Callable, NamedTuple
 
 import simplejson as json
-
 from pydantic import BaseModel, ValidationError
+
 from src.apigateway.responses import HttpResponse
-from src.apigateway.exceptions import InvalidSchemaException, UnkownGetItemMethod
-from src.dynamodb.ItemFactory import ItemFactory
-from src.dynamodb.helpers import get_item
+from src.apigateway.exceptions import UnkownGetItemMethod
 from src.services.base_service import BaseService
 
 
@@ -53,9 +51,7 @@ def http_get_pk_sk_from_path_request(
                 else None
             )
 
-            key: dict = entity_service.FACTORY.calculate_key(
-                pk_value, sk_value
-            )
+            key: dict = entity_service.FACTORY.calculate_key(pk_value, sk_value)
 
             service: BaseService = entity_service()
 
@@ -65,7 +61,7 @@ def http_get_pk_sk_from_path_request(
                     f"Unable to locate {get_item_method} on {entity_service.__name__}"
                 )
 
-            func(method(key))
+            return func(method(key))
 
         return wrapper
 

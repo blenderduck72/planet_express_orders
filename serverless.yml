@@ -36,16 +36,35 @@ package:
     - "src/**"
 
 functions:
-  hello:
-    handler: src.handler.hello
-
   HttpCreateCustomer:
-    handler: src.handler.http_create_customer
+    handler: src.handlers.http_create_customer
     events:
       - http:
-          path: v1/facility
+          path: v1/customer
           method: post
           private: true
+
+  HttpCreateOrder:
+    handler: src.handlers.http_create_order
+    events:
+      - http:
+          path: v1/order
+          method: post
+          private: true
+
+  HttpGetOrder:
+    handler: src.handlers.http_get_domain_order
+    events:
+      - http:
+          path: v1/order/{order_id}
+          method: get
+          private: true
+          request:
+            parameters:
+              paths:
+                order_id: true
+
+          
 
 
 custom:

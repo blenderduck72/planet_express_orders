@@ -7,7 +7,6 @@ name = "pypi"
 pydantic = {extras = ["email"], version = "*"}
 boto3 = "*"
 ksuid = "*"
-marshmallow = "*"
 simplejson = "*"
 click = "*"
 pytest-freezegun = "*"

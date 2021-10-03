@@ -3,7 +3,6 @@ from typing import List
 import json
 
 from src.apigateway.decorators import (
-    PathParameter,
     http_get_pk_sk_from_path_request,
     http_post_request,
 )
@@ -14,17 +13,8 @@ from src.services.exceptions import CreateCustomerException, CustomerLookupExcep
 from src.schemas.order import NewOrderSchema
 from src.schemas.customer import NewCustomerSchema
 from src.models.customer import Customer
-from src.models.order import DynamoOrder, OrderStatus
+from src.models.order import DynamoOrder, Order, OrderStatus
 from src.services.order_service import OrderService
-
-
-def hello(event, context):
-    body = {
-        "message": "Go Serverless v2.0! Your function executed successfully!",
-        "input": event,
-    }
-
-    return {"statusCode": 200, "body": json.dumps(body)}
 
 
 @http_post_request(schema=NewCustomerSchema)
@@ -94,9 +84,14 @@ def http_create_order(
 
 
 @http_get_pk_sk_from_path_request(
-    entity_service=OrderService, pk_path_parameter="order_id"
+    entity_service=OrderService,
+    pk_path_parameter="order_id",
+    get_item_method="get_domain_order_by_key",
 )
-def get_domain_order(order: OrderFactory):
-    import pdb
-
-    pdb.set_trace()
+def http_get_domain_order(
+    order: Order,
+) -> HttpResponse:
+    return HttpResponse(
+        status_code=200,
+        body=order.json(),
+    )

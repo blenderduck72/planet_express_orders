@@ -94,6 +94,28 @@ class OrderService(BaseService):
 
         return OrderFactory(item).model
 
+    def get_domain_order_by_key(
+        self,
+        key: dict,
+    ) -> OrderFactory:
+        items: List[dict] = query_by_key_condition_expression(
+            Key("pk").eq(key["pk"]),
+            table_name=self.TABLE_NAME,
+        )
+
+        order_dict: dict = {}
+        line_items: List[dict] = []
+
+        for item in items:
+            if item["entity"] == OrderFactory.PK_ENTITY:
+                order_dict = item
+
+            if item["entity"] == LineItemFactory.SK_ENTITY:
+                line_items.append(item)
+
+        order_dict["line_items"] = line_items
+        return OrderFactory.get_domain_model(order_dict)
+
     def get_domain_order_by_id(
         self,
         id: str,
