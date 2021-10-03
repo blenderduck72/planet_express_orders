@@ -1,2 +1,5 @@
+from src.constants import TABLE_NAME
+
+
 class BaseService:
-    pass
+    TABLE_NAME = TABLE_NAME

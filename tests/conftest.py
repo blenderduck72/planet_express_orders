@@ -1,4 +1,5 @@
 from copy import deepcopy
+from datetime import datetime
 from decimal import Decimal
 
 import boto3
@@ -30,8 +31,29 @@ def mock_aws_table():
                 {"AttributeName": "pk", "AttributeType": "S"},
                 {"AttributeName": "sk", "AttributeType": "S"},
             ],
+            GlobalSecondaryIndexes=[
+                {
+                    "IndexName": "sk_pk_index",
+                    "Projection": {"ProjectionType": "ALL"},
+                    "KeySchema": [
+                        {"AttributeName": "sk", "KeyType": "HASH"},
+                        {"AttributeName": "pk", "KeyType": "HASH"},
+                    ],
+                }
+            ],
         )
         yield
+
+
+@pytest.fixture
+def address_ddb_dict() -> dict:
+    return {
+        "line1": "471 1st Street Ct",
+        "line2": None,
+        "city": "Gotham",
+        "state": "IL",
+        "zipcode": "60603",
+    }
 
 
 @pytest.fixture
@@ -44,7 +66,7 @@ def customer_ddb_dict() -> dict:
         "email": "zapp.brannigan@decomcraticorderofplanets.com",
         "username": "VelourFog",
         "entity": CustomerFactory.SK_ENTITY,
-        "date_created": "2021-05-04",
+        "date_created": datetime.now().date().isoformat(),
     }
 
 
@@ -65,6 +87,14 @@ def customer_data_dict(customer_ddb_dict: dict) -> dict:
     customer_data.pop("entity")
 
     return customer_data
+
+
+@pytest.fixture
+def new_customer_data_dict(customer_data_dict: dict) -> dict:
+    new_customer_data: dict = deepcopy(customer_data_dict)
+    new_customer_data.pop("date_created")
+
+    return new_customer_data
 
 
 @pytest.fixture
@@ -99,6 +129,15 @@ def order_data_dict(order_ddb_dict: dict) -> dict:
     order_data.pop("entity")
 
     return order_data
+
+
+@pytest.fixture
+def new_order_data_dict(order_data_dict: dict) -> dict:
+    new_order_data = deepcopy(order_data_dict)
+    new_order_data.pop("datetime_created")
+    new_order_data.pop("id")
+
+    return new_order_data
 
 
 @pytest.fixture

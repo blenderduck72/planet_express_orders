@@ -3,18 +3,26 @@ from typing import List
 from pydantic import BaseModel
 
 from src.dynamodb.ItemFactory import ItemFactory
+from src.models.address import Address, DynamoAddress
 from src.models.customer import Customer
 from src.models.order import DynamoOrder, Order
 from src.models.line_item import LineItem
 
+class AddressFactory(ItemFactory):
+    PK_ENTITY: str = "Customer"
+    PK_FIELD: str = "email"
+    SK_ENTITY: str = "Address"
+    SK_FIELD: str = "id"
+    DDB_MODEL: BaseModel = DynamoAddress
+    DOMAIN_MODEL: Address = Address
 
 class CustomerFactory(ItemFactory):
     PK_ENTITY: str = "Customer"
     PK_FIELD: str = "email"
     SK_ENTITY: str = "User"
     SK_FIELD: str = "username"
-    DDB_MODEL: BaseModel = Customer
-    DOMAIN_MODEL: BaseModel = Customer
+    DDB_MODEL: Customer = Customer
+    DOMAIN_MODEL: Customer = Customer
 
 
 class LineItemFactory(ItemFactory):
@@ -22,8 +30,8 @@ class LineItemFactory(ItemFactory):
     PK_FIELD: str = "order_id"
     SK_ENTITY: str = "LineItem"
     SK_FIELD: str = "id"
-    DDB_MODEL: BaseModel = LineItem
-    DOMAIN_MODEL: BaseModel = LineItem
+    DDB_MODEL: LineItem = LineItem
+    DOMAIN_MODEL: LineItem = LineItem
 
 
 class OrderFactory(ItemFactory):
@@ -31,5 +39,5 @@ class OrderFactory(ItemFactory):
     PK_FIELD: str = "id"
     SK_ENTITY: str = None
     SK_FIELD: str = None
-    DDB_MODEL: BaseModel = DynamoOrder
-    DOMAIN_MODEL: BaseModel = Order
+    DDB_MODEL: DynamoOrder = DynamoOrder
+    DOMAIN_MODEL: Order = Order

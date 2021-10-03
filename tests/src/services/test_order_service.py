@@ -17,20 +17,19 @@ from src.services.exceptions import RemoveLineItemException
 class TestOrderService:
     def test_create_order(
         self,
-        order_data_dict: dict,
+        order_ddb_dict: dict,
+        new_order_data_dict: dict,
     ) -> None:
-        new_order_data: dict = deepcopy(order_data_dict)
-        new_order_data.pop("id")
-        new_order_data.pop("datetime_created")
-        new_order_data["status"] = OrderStatus.NEW
+        new_order_data_dict["status"] = OrderStatus.NEW
         client: OrderService = OrderService()
 
-        dynamo_order: DynamoOrder = client.create_order(new_order_data)
+        dynamo_order: DynamoOrder = client.create_order(new_order_data_dict)
 
         assert dynamo_order
         assert isinstance(dynamo_order, DynamoOrder)
         fetched_order: dict = get_item(OrderFactory.get_models_key(dynamo_order))
         assert fetched_order
+        assert fetched_order["id"]
 
     def test_order_adds_line_item_and_increments_item_count(
         self,

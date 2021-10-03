@@ -11,6 +11,9 @@ provider:
   lambdaHashingVersion: 20201221
   stage: dev
   region: us-east-2
+  apiGateway:
+    apiKeys:
+      - planet-express-order-demo
   environment:
     PLNT_EXPRESS_TBL: planet_express_orders
     
@@ -36,6 +39,15 @@ functions:
   hello:
     handler: src.handler.hello
 
+  HttpCreateCustomer:
+    handler: src.handler.http_create_customer
+    events:
+      - http:
+          path: v1/facility
+          method: post
+          private: true
+
+
 custom:
   pythonRequirements:
     usePipenv: true
@@ -48,7 +60,7 @@ resources:
     PlanetExpressDB:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: planet_express_table
+        TableName: planet_express_orders
         KeySchema:
           - AttributeName: pk
             KeyType: HASH

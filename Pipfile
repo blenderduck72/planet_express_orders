@@ -10,6 +10,7 @@ ksuid = "*"
 marshmallow = "*"
 simplejson = "*"
 click = "*"
+pytest-freezegun = "*"
 
 [dev-packages]
 pytest = "*"

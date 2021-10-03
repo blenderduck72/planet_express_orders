@@ -1,4 +1,6 @@
-from pydantic import BaseModel
+from datetime import datetime
+from pydantic import BaseModel, EmailStr
+
 
 
 class Address(BaseModel):
@@ -9,3 +11,8 @@ class Address(BaseModel):
     state: str
     zipcode: str
     type: str
+
+
+class DynamoAddress(Address):
+    email: EmailStr
+    datetime_created: datetime

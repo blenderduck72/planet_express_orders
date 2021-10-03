@@ -2,7 +2,7 @@ from datetime import datetime
 from enum import Enum
 from typing import List
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field
 
 from src.models.line_item import LineItem
 
@@ -38,6 +38,10 @@ class DynamoOrder(BaseModel):
 
 
 class Order(DynamoOrder):
+    class Config:
+        use_enum_vlaue = True
+        title = "Domain Order Model"
+
     line_items: List[LineItem] = Field(
         [], description="Line items associated with an Order."
     )

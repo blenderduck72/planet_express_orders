@@ -5,14 +5,14 @@ import boto3
 from boto3.dynamodb.conditions import Key
 from ksuid import ksuid
 
-from src.constants import TABLE_NAME
 from src.dynamodb.ModelFactory import OrderFactory, LineItemFactory
 from src.dynamodb.helpers import get_item, put_item, query_by_key_condition_expression
 from src.models.order import DynamoOrder, Order, OrderStatus
 from src.services.exceptions import RemoveLineItemException
+from src.services.base_service import BaseService
 
 
-class OrderService:
+class OrderService(BaseService):
     @classmethod
     def get_order_key_from_id(
         cls,
@@ -48,11 +48,28 @@ class OrderService:
         new_order_data["status"] = OrderStatus.NEW
         client = boto3.resource("dynamodb")
         order_factory: OrderFactory = OrderFactory(new_order_data)
-        put_item(order_factory.item)
+        put_item(order_factory.item, self.TABLE_NAME)
 
         return order_factory.model
 
-    def update_order(self, order_data: dict) -> dict:
+    def update_order(
+        self,
+        order_data: dict,
+    ) -> dict:
+        pass
+
+    def update_line_item(
+        self,
+        order_id: str,
+        line_item_id: int,
+    ) -> None:
+        pass
+
+    def update_order_address(
+        self,
+        order_id: str,
+        address_id: str,
+    ) -> None:
         pass
 
     def get_order_item_by_id(
@@ -69,7 +86,7 @@ class OrderService:
     def get_order_item_by_key(
         self, key: dict, deserialize=True
     ) -> dict or DynamoOrder or None:
-        item: dict = get_item(key)
+        item: dict = get_item(key, self.TABLE_NAME)
         if not deserialize or not item:
             return item
 
@@ -81,7 +98,8 @@ class OrderService:
         deserialize=True,
     ) -> List[dict] or Order:
         items: List[dict] = query_by_key_condition_expression(
-            Key("pk").eq(f"{OrderFactory.PK_ENTITY}#{id}")
+            Key("pk").eq(f"{OrderFactory.PK_ENTITY}#{id}"),
+            table_name=self.TABLE_NAME,
         )
 
         if not deserialize:
@@ -105,7 +123,7 @@ class OrderService:
         order_key: dict,
         new_line_item_data: dict,
     ) -> dict:
-        table = boto3.resource("dynamodb").Table(TABLE_NAME)
+        table = boto3.resource("dynamodb").Table(self.TABLE_NAME)
         response: dict = table.update_item(
             Key=order_key,
             UpdateExpression="SET #item_count = #item_count + :incr",
@@ -130,14 +148,14 @@ class OrderService:
         order_key: dict = self.get_order_key_from_id(order_id)
         line_item_key: dict = self.get_line_item_key_from_id(order_id, line_item_id)
 
-        client = boto3.resource("dynamodb").Table(TABLE_NAME)
+        client = boto3.resource("dynamodb").Table(self.TABLE_NAME)
 
         try:
             client.meta.client.transact_write_items(
                 TransactItems=[
                     {
                         "Update": {
-                            "TableName": TABLE_NAME,
+                            "TableName": self.TABLE_NAME,
                             "Key": order_key,
                             "UpdateExpression": "SET #item_count = #item_count - :inc",
                             "ExpressionAttributeNames": {
@@ -153,7 +171,7 @@ class OrderService:
                     },
                     {
                         "Delete": {
-                            "TableName": TABLE_NAME,
+                            "TableName": self.TABLE_NAME,
                             "Key": line_item_key,
                             "ConditionExpression": "attribute_exists(sk)",
                         },
