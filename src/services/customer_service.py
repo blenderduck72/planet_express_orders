@@ -3,16 +3,23 @@ from typing import List
 
 import boto3
 from boto3.dynamodb.conditions import Key
+from ksuid import ksuid
 
-from dynamodb.helpers import query_by_key_condition_expression
-from src.models.address import Address, DynamoAddress
+from src.dynamodb.helpers import get_item, put_item, query_by_key_condition_expression
+from src.models.address import DynamoAddress
 from src.models.customer import Customer
 from src.services.base_service import BaseService
-from src.dynamodb.ModelFactory import CustomerFactory
-from src.services.exceptions import CreateCustomerException
+from src.dynamodb.ModelFactory import AddressFactory, CustomerFactory
+from src.services.exceptions import (
+    CreateCustomerException,
+    CustomerLookupException,
+    DuplicateCustomerKeyException,
+)
 
 
 class CustomerService(BaseService):
+    FACTORY: CustomerFactory = CustomerFactory
+
     def create_customer(
         self,
         new_customer_data: dict,
@@ -52,11 +59,66 @@ class CustomerService(BaseService):
         self,
         username: str,
         new_address_data: dict,
-    ) -> Address:
-        customers: List[dict] = query_by_key_condition_expression(
+    ) -> DynamoAddress:
+        customer_items: List[dict] = query_by_key_condition_expression(
             key_condition_expression=Key("sk").eq(
                 f"{CustomerFactory.SK_ENTITY}#{username}"
-            ),
+            )
+            & Key("pk").begins_with("Customer#"),
             index_name="sk_pk_index",
             table_name=self.TABLE_NAME,
         )
+
+        if not customer_items:
+            raise CustomerLookupException("Unable to locate Customer.")
+
+        if len(customer_items) > 1:
+            raise DuplicateCustomerKeyException
+
+        customer: dict = customer_items[0]
+        address_id: ksuid = ksuid()
+
+        new_address_data["id"] = str(address_id)
+        new_address_data["email"] = customer["email"]
+        new_address_data["datetime_created"] = address_id.getDatetime().strftime(
+            "%Y-%m-%dT%H:%M:%SZ"
+        )
+        address_factory: AddressFactory = AddressFactory(new_address_data)
+
+        put_item(
+            item=address_factory.item,
+            table_name=self.TABLE_NAME,
+        )
+
+        return address_factory.model
+
+    def get_customer_by_email(
+        self,
+        email: str,
+    ) -> Customer:
+        customer_items: List[dict] = query_by_key_condition_expression(
+            key_condition_expression=Key(f"{CustomerFactory.PK_ENTITY}#{email}")
+            & Key("sk").begins_with(f"{CustomerFactory.SK_ENTITY}#"),
+            table_name=self.TABLE_NAME,
+        )
+
+        if not customer_items:
+            raise CustomerLookupException("Unable to locate Customer.")
+
+        return CustomerFactory(customer_items[0]).model
+
+    def get_customer_items_by_email(
+        self,
+        email: str,
+    ) -> List[dict]:
+        customer_items: List[dict] = query_by_key_condition_expression(
+            key_condition_expression=Key("pk").eq(
+                f"{CustomerFactory.PK_ENTITY}#{email}"
+            ),
+            table_name=self.TABLE_NAME,
+        )
+
+        if not customer_items:
+            raise CustomerLookupException("Unable to locate Customer.")
+
+        return customer_items

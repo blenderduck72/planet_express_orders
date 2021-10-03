@@ -2,6 +2,7 @@ from copy import deepcopy
 from datetime import datetime
 from decimal import Decimal
 
+
 import boto3
 import moto
 import pytest
@@ -9,7 +10,13 @@ from ksuid import ksuid
 
 from src.constants import TABLE_NAME
 from src.dynamodb.helpers import put_item
-from src.dynamodb.ModelFactory import CustomerFactory, LineItemFactory, OrderFactory
+from src.dynamodb.ModelFactory import (
+    AddressFactory,
+    CustomerFactory,
+    LineItemFactory,
+    OrderFactory,
+)
+from src.models.address import AddressType
 from src.models.order import DynamoOrder
 
 
@@ -37,7 +44,7 @@ def mock_aws_table():
                     "Projection": {"ProjectionType": "ALL"},
                     "KeySchema": [
                         {"AttributeName": "sk", "KeyType": "HASH"},
-                        {"AttributeName": "pk", "KeyType": "HASH"},
+                        {"AttributeName": "pk", "KeyType": "RANGE"},
                     ],
                 }
             ],
@@ -46,14 +53,50 @@ def mock_aws_table():
 
 
 @pytest.fixture
-def address_ddb_dict() -> dict:
+def address_ddb_dict(customer_ddb_dict) -> dict:
+
+    address_id: ksuid = ksuid()
     return {
+        "pk": f"{AddressFactory.PK_ENTITY}#{customer_ddb_dict['email']}",
+        "sk": f"{AddressFactory.SK_ENTITY}#{str(address_id)}",
+        "entity": AddressFactory.PK_ENTITY,
+        "id": str(address_id),
         "line1": "471 1st Street Ct",
         "line2": None,
         "city": "Gotham",
         "state": "IL",
         "zipcode": "60603",
+        "type": AddressType.DELIVERY,
+        "datetime_created": datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ"),
     }
+
+
+@pytest.fixture
+def persisted_address_ddb_dict(address_ddb_dict) -> None:
+    put_item(address_ddb_dict)
+    return address_ddb_dict
+
+
+@pytest.fixture
+def address_data_dict(
+    address_ddb_dict: dict,
+) -> dict:
+    address_data: dict = deepcopy(address_ddb_dict)
+    address_data.pop("pk")
+    address_data.pop("sk")
+    address_data.pop("entity")
+
+    return address_data
+
+
+@pytest.fixture
+def new_address_data_dict(
+    address_data_dict: dict,
+) -> dict:
+    new_address_data: dict = deepcopy(address_data_dict)
+    new_address_data.pop("id")
+
+    return new_address_data
 
 
 @pytest.fixture
@@ -122,7 +165,9 @@ def order_ddb_dict() -> dict:
 
 
 @pytest.fixture
-def order_data_dict(order_ddb_dict: dict) -> dict:
+def order_data_dict(
+    order_ddb_dict: dict,
+) -> dict:
     order_data: dict = deepcopy(order_ddb_dict)
     order_data.pop("pk")
     order_data.pop("sk")
@@ -132,12 +177,28 @@ def order_data_dict(order_ddb_dict: dict) -> dict:
 
 
 @pytest.fixture
-def new_order_data_dict(order_data_dict: dict) -> dict:
+def new_order_data_dict(
+    order_data_dict: dict,
+) -> dict:
     new_order_data = deepcopy(order_data_dict)
     new_order_data.pop("datetime_created")
     new_order_data.pop("id")
 
     return new_order_data
+
+
+@pytest.fixture
+def new_order_parameters(
+    persisted_address_ddb_dict: dict,
+    new_order_data_dict: dict,
+) -> dict:
+    parameter_data: dict = deepcopy(new_order_data_dict)
+    parameter_data.pop("delivery_address")
+    parameter_data.pop("status")
+    parameter_data.pop("item_count")
+    parameter_data["delivery_address_id"] = persisted_address_ddb_dict["id"]
+
+    return parameter_data
 
 
 @pytest.fixture

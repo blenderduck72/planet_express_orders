@@ -1,8 +1,10 @@
 from copy import deepcopy
+from typing import List
 
 import pytest
+from boto3.dynamodb.conditions import Key
 
-from src.dynamodb.helpers import get_item
+from src.dynamodb.helpers import get_item, query_by_key_condition_expression
 from src.dynamodb.ModelFactory import CustomerFactory
 from src.models.customer import Customer
 from src.services.customer_service import CustomerService
@@ -46,6 +48,16 @@ class TestCustomerService:
     def test_add_customer_address(
         self,
         persisted_customer_ddb_dict: dict,
+        new_address_data_dict: dict,
     ) -> None:
         customer_client: CustomerService = CustomerService()
-        customer_client.add_customer_address(persisted_customer_ddb_dict["username"])
+        customer_client.add_customer_address(
+            persisted_customer_ddb_dict["username"],
+            new_address_data_dict,
+        )
+
+        customer_items: List[dict] = query_by_key_condition_expression(
+            key_condition_expression=Key("pk").eq(persisted_customer_ddb_dict["pk"])
+        )
+
+        assert len(customer_items) == 2

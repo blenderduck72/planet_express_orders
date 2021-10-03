@@ -13,6 +13,8 @@ from src.services.base_service import BaseService
 
 
 class OrderService(BaseService):
+    FACTORY: OrderFactory = OrderFactory
+
     @classmethod
     def get_order_key_from_id(
         cls,
@@ -23,7 +25,7 @@ class OrderService(BaseService):
 
     @classmethod
     def get_line_item_key_from_id(
-        self,
+        cls,
         order_id: str,
         line_item_id: int,
     ) -> dict:

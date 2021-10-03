@@ -34,7 +34,7 @@ class DynamoOrder(BaseModel):
     datetime_created: datetime = Field(description="Date the Order is created.")
     delivery_address: DeliveryAddress = Field("Customer's delivery address.")
     status: OrderStatus = Field(description="Order's current status.")
-    item_count: int = Field(description="Total line items in the order")
+    item_count: int = Field(default=0, description="Total line items in the order")
 
 
 class Order(DynamoOrder):

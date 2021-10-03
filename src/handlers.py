@@ -1,11 +1,21 @@
+from typing import List
+
 import json
 
-from src.apigateway.decorators import http_post_request
+from src.apigateway.decorators import (
+    PathParameter,
+    http_get_pk_sk_from_path_request,
+    http_post_request,
+)
 from src.apigateway.responses import HttpResponse
+from src.dynamodb.ModelFactory import OrderFactory
 from src.services.customer_service import CustomerService
-from src.services.exceptions import CreateCustomerException
+from src.services.exceptions import CreateCustomerException, CustomerLookupException
+from src.schemas.order import NewOrderSchema
 from src.schemas.customer import NewCustomerSchema
 from src.models.customer import Customer
+from src.models.order import DynamoOrder, OrderStatus
+from src.services.order_service import OrderService
 
 
 def hello(event, context):
@@ -47,3 +57,46 @@ def http_create_customer(
         status_code=201,
         body=customer.json(),
     )
+
+
+@http_post_request(schema=NewOrderSchema)
+def http_create_order(
+    new_order_data: dict,
+) -> HttpResponse:
+
+    try:
+        customer_client: CustomerService = CustomerService()
+        customer_items: List[dict] = customer_client.get_customer_items_by_email(
+            new_order_data["customer_email"]
+        )
+    except CustomerLookupException:
+        return HttpResponse(status_code=422, body={"message": "Customer not found."})
+
+    delivery_address: dict = next(
+        (
+            item
+            for item in customer_items
+            if item.get("id") == new_order_data["delivery_address_id"]
+        ),
+        None,
+    )
+
+    if not delivery_address:
+        return HttpResponse(422, body={"message": "Invalid delivery_address_id"})
+
+    new_order_data["delivery_address"] = delivery_address
+    new_order_data["status"] = OrderStatus.NEW
+
+    order_client: OrderService = OrderService()
+    order: DynamoOrder = order_client.create_order(new_order_data)
+
+    return HttpResponse(status_code=201, body=order.json())
+
+
+@http_get_pk_sk_from_path_request(
+    entity_service=OrderService, pk_path_parameter="order_id"
+)
+def get_domain_order(order: OrderFactory):
+    import pdb
+
+    pdb.set_trace()

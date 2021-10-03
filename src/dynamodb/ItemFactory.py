@@ -1,3 +1,5 @@
+from typing import List
+
 import simplejson as json
 
 from pydantic import BaseModel
@@ -76,3 +78,18 @@ class ItemFactory:
     @classmethod
     def get_domain_model(cls, domain_data: dict) -> BaseModel:
         return cls.DOMAIN_MODEL(**domain_data)
+
+    @classmethod
+    def calculate_key(
+        cls,
+        pk_value: str or int,
+        sk_value: str or int or None = None,
+    ) -> dict:
+        pk: str = f"{cls.PK_ENTITY}#{str(pk_value)}"
+
+        if ItemFactory.SK_ENTITY is None:
+            return {"pk": pk, "sk": pk}
+
+        if sk_value is None:
+            raise Exception("SK value is required to calculate key on this Item.")
+        return {"pk": pk, "sk": f"{cls.SK_ENTITY}#{str(sk_value)}"}
