@@ -1,4 +1,3 @@
-from _pytest.nodes import Item
 from src.constants import TABLE_NAME
 from src.dynamodb.ItemFactory import ItemFactory
 from src.dynamodb.helpers import get_item

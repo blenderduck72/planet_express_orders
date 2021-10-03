@@ -1,8 +1,6 @@
 from datetime import date
 
-from pydantic import EmailStr
-
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 
 
 class Customer(BaseModel):

@@ -8,8 +8,8 @@ from ksuid import ksuid
 from src.dynamodb.ModelFactory import OrderFactory, LineItemFactory
 from src.dynamodb.helpers import get_item, put_item, query_by_key_condition_expression
 from src.models.order import DynamoOrder, Order, OrderStatus
-from src.services.exceptions import RemoveLineItemException
 from src.services.base_service import BaseService
+from src.services.exceptions import RemoveLineItemException
 
 
 class OrderService(BaseService):

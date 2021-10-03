@@ -6,10 +6,10 @@ from boto3.dynamodb.conditions import Key
 from ksuid import ksuid
 
 from src.dynamodb.helpers import get_item, put_item, query_by_key_condition_expression
+from src.dynamodb.ModelFactory import AddressFactory, CustomerFactory
 from src.models.address import DynamoAddress
 from src.models.customer import Customer
 from src.services.base_service import BaseService
-from src.dynamodb.ModelFactory import AddressFactory, CustomerFactory
 from src.services.exceptions import (
     CreateCustomerException,
     CustomerLookupException,

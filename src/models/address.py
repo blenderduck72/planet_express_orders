@@ -10,13 +10,16 @@ class AddressType(str, Enum):
 
 
 class Address(BaseModel):
+    class Config:
+        use_enum_value = True
+
     id: str
     line1: str
     line2: str = None
     city: str
     state: str
     zipcode: str
-    type: str
+    type: AddressType
 
 
 class DynamoAddress(Address):

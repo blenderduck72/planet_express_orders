@@ -1,5 +1,5 @@
 from functools import wraps
-from typing import Callable, NamedTuple
+from typing import Callable
 
 import simplejson as json
 from pydantic import BaseModel, ValidationError

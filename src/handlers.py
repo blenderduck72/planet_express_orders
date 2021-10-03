@@ -1,20 +1,18 @@
 from typing import List
 
-import json
-
 from src.apigateway.decorators import (
     http_get_pk_sk_from_path_request,
     http_post_request,
 )
 from src.apigateway.responses import HttpResponse
 from src.dynamodb.ModelFactory import OrderFactory
-from src.services.customer_service import CustomerService
-from src.services.exceptions import CreateCustomerException, CustomerLookupException
-from src.schemas.order import NewOrderSchema
-from src.schemas.customer import NewCustomerSchema
 from src.models.customer import Customer
 from src.models.order import DynamoOrder, Order, OrderStatus
+from src.schemas.order import NewOrderSchema
+from src.schemas.customer import NewCustomerSchema
+from src.services.customer_service import CustomerService
 from src.services.order_service import OrderService
+from src.services.exceptions import CreateCustomerException, CustomerLookupException
 
 
 @http_post_request(schema=NewCustomerSchema)
