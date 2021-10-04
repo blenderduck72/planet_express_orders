@@ -5,9 +5,12 @@ from src.apigateway.decorators import (
     http_post_request,
 )
 from src.apigateway.responses import HttpResponse
-from src.dynamodb.ModelFactory import OrderFactory
-from src.models.customer import Customer
-from src.models.order import DynamoOrder, Order, OrderStatus
+from src.models import (
+    Customer,
+    DynamoOrder,
+    Order,
+    OrderStatus,
+)
 from src.schemas.order import NewOrderSchema
 from src.schemas.customer import NewCustomerSchema
 from src.services.customer_service import CustomerService
@@ -19,7 +22,6 @@ from src.services.exceptions import CreateCustomerException, CustomerLookupExcep
 def http_create_customer(
     new_customer_data: dict,
 ) -> HttpResponse:
-
     """
     Accepts a Dictionary formatted in the NewCustomerSchema.
 

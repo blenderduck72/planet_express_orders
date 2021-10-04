@@ -10,6 +10,8 @@ ksuid = "*"
 simplejson = "*"
 click = "*"
 pytest-freezegun = "*"
+requests = "*"
+python-dotenv = "*"
 
 [dev-packages]
 pytest = "*"

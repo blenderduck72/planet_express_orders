@@ -51,7 +51,6 @@ class ItemFactory:
     @property
     def item(self) -> dict:
         item: dict = json.loads(self.model.json())
-
         if not item:
             raise Exception
 

@@ -39,7 +39,7 @@ class DynamoOrder(BaseModel):
 
 class Order(DynamoOrder):
     class Config:
-        use_enum_vlaue = True
+        use_enum_value = True
         title = "Domain Order Model"
 
     line_items: List[LineItem] = Field(

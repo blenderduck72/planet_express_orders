@@ -21,7 +21,6 @@ def http_post_request(schema: BaseModel) -> HttpResponse:
                 raw_data: str = event.get("body")
                 data: dict = json.loads(raw_data)
                 model: BaseModel = schema(**data)
-
                 return func(model.dict())
 
             except ValidationError as e:

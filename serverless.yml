@@ -1,7 +1,4 @@
-org: darinedward72
-app: planet-express-orders
 service: planet-express-orders
-
 frameworkVersion: '2'
 
 

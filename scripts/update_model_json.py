@@ -1,11 +1,12 @@
 from typing import List
+
 import click
 import simplejson as json
 
 from script_setup import *  # must be imported prior to src imports
-
 from src.models.order import Order
 from src.models.customer import Customer
+
 
 @click.command()
 def main():

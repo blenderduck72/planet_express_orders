@@ -5,10 +5,9 @@ import boto3
 from boto3.dynamodb.conditions import Key
 from ksuid import ksuid
 
-from src.dynamodb.helpers import get_item, put_item, query_by_key_condition_expression
+from src.dynamodb.helpers import put_item, query_by_key_condition_expression
 from src.dynamodb.ModelFactory import AddressFactory, CustomerFactory
-from src.models.address import DynamoAddress
-from src.models.customer import Customer
+from src.models import Customer, DynamoAddress
 from src.services.base_service import BaseService
 from src.services.exceptions import (
     CreateCustomerException,
@@ -33,14 +32,10 @@ class CustomerService(BaseService):
         Returns:
             customer(Customer): Pydantic Customer model
         """
-
         new_customer_data["date_created"] = datetime.now().date().isoformat()
-
         customer_factory: CustomerFactory = CustomerFactory(new_customer_data)
-
         client = boto3.resource("dynamodb")
         table = client.Table(self.TABLE_NAME)
-
         try:
             table.put_item(
                 Item=customer_factory.item,

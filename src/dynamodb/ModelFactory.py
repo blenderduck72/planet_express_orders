@@ -3,10 +3,15 @@ from typing import List
 from pydantic import BaseModel
 
 from src.dynamodb.ItemFactory import ItemFactory
-from src.models.address import Address, DynamoAddress
-from src.models.customer import Customer
-from src.models.order import DynamoOrder, Order
-from src.models.line_item import LineItem
+from src.models import (
+    Address,
+    Customer,
+    DynamoAddress,
+    DynamoOrder,
+    Order,
+    LineItem,
+)
+
 
 class AddressFactory(ItemFactory):
     PK_ENTITY: str = "Customer"
@@ -15,6 +20,7 @@ class AddressFactory(ItemFactory):
     SK_FIELD: str = "id"
     DDB_MODEL: BaseModel = DynamoAddress
     DOMAIN_MODEL: Address = Address
+
 
 class CustomerFactory(ItemFactory):
     PK_ENTITY: str = "Customer"
