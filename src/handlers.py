@@ -1,5 +1,7 @@
 from typing import List
 
+import simplejson as json
+
 from src.apigateway.decorators import (
     http_get_pk_sk_from_path_request,
     http_post_request,
@@ -7,15 +9,19 @@ from src.apigateway.decorators import (
 from src.apigateway.responses import HttpResponse
 from src.models import (
     Customer,
+    DynamoAddress,
     DynamoOrder,
     Order,
     OrderStatus,
 )
-from src.schemas.order import NewOrderSchema
+from src.schemas.address import NewAddressSchema
 from src.schemas.customer import NewCustomerSchema
+from src.schemas.line_item import NewLineItemSchema
+from src.schemas.order import NewOrderSchema
 from src.services.customer_service import CustomerService
-from src.services.order_service import OrderService
 from src.services.exceptions import CreateCustomerException, CustomerLookupException
+from src.services.order_service import OrderService
+from src.dynamodb.ModelFactory import OrderFactory
 
 
 @http_post_request(schema=NewCustomerSchema)
@@ -47,6 +53,24 @@ def http_create_customer(
         status_code=201,
         body=customer.json(),
     )
+
+
+@http_post_request(schema=NewAddressSchema)
+def http_add_address_to_customer(
+    new_address_data: dict,
+    username: str,
+) -> HttpResponse:
+
+    try:
+        customer_client: CustomerService = CustomerService()
+        address: DynamoAddress = customer_client.add_customer_address(
+            username=username,
+            new_address_data=new_address_data,
+        )
+    except CustomerLookupException:
+        return HttpResponse(status_code=404, body={"message": "Customer not found"})
+
+    return HttpResponse(status_code=201, body=address.json())
 
 
 @http_post_request(schema=NewOrderSchema)
@@ -94,4 +118,19 @@ def http_get_domain_order(
     return HttpResponse(
         status_code=200,
         body=order.json(),
+    )
+
+
+@http_post_request(schema=NewLineItemSchema)
+def http_add_line_item(new_line_item_data: dict, order_id: str):
+    order_client: OrderService = OrderService()
+    new_line_item_data["order_id"] = order_id
+    line_item: dict = order_client.add_line_item_to_order(
+        order_key=OrderFactory.calculate_key(order_id),
+        new_line_item_data=new_line_item_data,
+    )
+
+    return HttpResponse(
+        status_code=201,
+        body=json.dumps(line_item),
     )

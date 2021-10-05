@@ -1,14 +1,11 @@
 import os
-from pprint import pprint
 
+import click
 import requests
 from requests.models import Response
 
-import click
-
 from script_setup import *
-
-url: str = os.environ["CREATE_CUSTOMER_URL"]
+from src.models import AddressType
 
 headers: dict = {
     "x-api-key": os.environ["X_API_KEY"],
@@ -25,16 +22,35 @@ def main() -> None:
         "username": "pfry",
     }
 
+    customer_address: dict = {
+        "line1": "471 1st Street Ct",
+        "line2": None,
+        "city": "Gotham",
+        "state": "IL",
+        "zipcode": "60603",
+        "type": AddressType.DELIVERY,
+    }
+
     response: Response = requests.post(
-        url=url,
+        url=os.environ["CREATE_CUSTOMER_URL"],
         json=new_customer,
         headers=headers,
     )
 
-    print(f"Status: {response.status_code}")
-    print("Response:")
-    print("-------")
-    pprint(response.json())
+    print_request_response(response)
+
+    if response.status_code == 201:
+        response: Response = requests.post(
+            url=f"{os.environ['CREATE_CUSTOMER_URL']}/{new_customer['username']}/address",
+            json=customer_address,
+            headers=headers,
+        )
+
+        print_request_response(response)
+
+        import pdb
+
+        pdb.set_trace()
 
 
 if __name__ == "__main__":

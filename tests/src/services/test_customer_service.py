@@ -61,17 +61,3 @@ class TestCustomerService:
         )
 
         assert len(customer_items) == 2
-
-
-def test_bob():
-    some_data: dict = {
-        "email": "philipfry@planetexpress.com",
-        "first_name": "philip",
-        "last_name": "fry",
-        "username": "pfry",
-        "date_created": "2021-10-04",
-    }
-    customer_factory = CustomerFactory(some_data)
-    import pdb
-
-    pdb.set_trace()

@@ -2,12 +2,9 @@ from pydantic import BaseModel
 
 
 class NewLineItemSchema(BaseModel):
-    pass
+    class Config:
+        extra = "forbid"
 
-
-class UpdateLineItemSchema(BaseModel):
-    pass
-
-
-class CancelLineItemSchema(BaseModel):
-    pass
+    name: str
+    description: str
+    quantity: int

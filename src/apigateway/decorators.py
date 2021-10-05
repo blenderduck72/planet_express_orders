@@ -16,11 +16,14 @@ def http_post_request(schema: BaseModel) -> HttpResponse:
             event: dict = (
                 f_args[0] if not f_kwargs.get("event") else f_kwargs.get("event")
             )
+            path_parametrs: dict = event.get("pathParameters")
 
             try:
                 raw_data: str = event.get("body")
                 data: dict = json.loads(raw_data)
                 model: BaseModel = schema(**data)
+                if path_parametrs:
+                    return func(model.dict(), **path_parametrs)
                 return func(model.dict())
 
             except ValidationError as e:
@@ -51,7 +54,6 @@ def http_get_pk_sk_from_path_request(
             )
 
             key: dict = entity_service.FACTORY.calculate_key(pk_value, sk_value)
-
             service: BaseService = entity_service()
 
             method: Callable = getattr(service, get_item_method, None)

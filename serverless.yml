@@ -12,7 +12,7 @@ provider:
     apiKeys:
       - planet-express-order-demo
   environment:
-    PLNT_EXPRESS_TBL: planet_express_orders
+    PLNT_EXPRESS_TBL: ${self:custom.table_name}
     
   iam:
     role:
@@ -24,9 +24,10 @@ provider:
             - dynamodb:Query
             - dynamodb:UpdateItem
           Resource:
-            Fn::GetAtt:
-              - PlanetExpressDB
-              - Arn
+            - !Sub "${PlanetExpressDB.Arn}"
+            - !Sub "${PlanetExpressDB.Arn}/index/*"
+
+            
 package:
   patterns:
     - "!**/**"
@@ -40,6 +41,18 @@ functions:
           path: v1/customer
           method: post
           private: true
+
+  HttpCustomerAddress:
+    handler: src.handlers.http_add_address_to_customer
+    events:
+      - http:
+          path: v1/customer/{username}/address
+          method: post
+          private: true
+          request:
+            parameters:
+              paths:
+                username: true
 
   HttpCreateOrder:
     handler: src.handlers.http_create_order
@@ -61,10 +74,20 @@ functions:
               paths:
                 order_id: true
 
-          
-
+  HttpOrderAddLineItem:
+    handler: src.handlers.http_add_line_item
+    events:
+      - http:
+          path: v1/order/{order_id}/line_item
+          method: post
+          private: true
+          request:
+            parameters:
+              paths:
+                order_id: true
 
 custom:
+  table_name: planet_express_orders
   pythonRequirements:
     usePipenv: true
     dockerizePip: non-linux
@@ -76,7 +99,7 @@ resources:
     PlanetExpressDB:
       Type: AWS::DynamoDB::Table
       Properties:
-        TableName: planet_express_orders
+        TableName: ${self:custom.table_name}
         KeySchema:
           - AttributeName: pk
             KeyType: HASH
@@ -90,6 +113,19 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
+        GlobalSecondaryIndexes:
+          - IndexName: 'sk_pk_index'
+            Projection:
+              ProjectionType: ALL
+            KeySchema:
+              - AttributeName: sk
+                KeyType: HASH
+              - AttributeName: pk
+                KeyType: RANGE
+            ProvisionedThroughput:
+              ReadCapacityUnits: 1
+              WriteCapacityUnits: 1
+
 
 plugins:
   - serverless-python-requirements
