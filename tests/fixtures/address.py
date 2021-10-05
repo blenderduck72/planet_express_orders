@@ -5,17 +5,16 @@ import pytest
 from ksuid import ksuid
 
 from src.dynamodb.helpers import put_item
-from src.factory.model_factory import AddressFactory
-from src.models import AddressType
+from src.models import DynamoAddress, AddressType
 
 
 @pytest.fixture
 def address_ddb_dict(customer_ddb_dict) -> dict:
     address_id: ksuid = ksuid()
     return {
-        "pk": f"{AddressFactory.PK_ENTITY}#{customer_ddb_dict['email']}",
-        "sk": f"{AddressFactory.SK_ENTITY}#{str(address_id)}",
-        "entity": AddressFactory.PK_ENTITY,
+        "pk": f"{DynamoAddress._PK_ENTITY}#{customer_ddb_dict['email']}",
+        "sk": f"{DynamoAddress._SK_ENTITY}#{str(address_id)}",
+        "entity": DynamoAddress._PK_ENTITY,
         "id": str(address_id),
         "line1": "471 1st Street Ct",
         "line2": None,

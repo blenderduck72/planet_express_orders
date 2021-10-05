@@ -5,7 +5,6 @@ import pytest
 from boto3.dynamodb.conditions import Key
 
 from src.dynamodb.helpers import get_item, query_by_key_condition_expression
-from src.factory.model_factory import CustomerFactory
 from src.models.customer import Customer
 from src.services.customer_service import CustomerService
 from src.services.exceptions import CreateCustomerException
@@ -18,13 +17,13 @@ class TestCustomerService:
         customer_ddb_dict: dict,
     ) -> None:
         new_customer_data: dict = deepcopy(customer_data_dict)
-        customer_factory: CustomerFactory = CustomerFactory(customer_data_dict)
+        customer: Customer = Customer(**customer_data_dict)
         new_customer_data.pop("date_created")
 
         customer_client: CustomerService = CustomerService()
         customer_model: Customer = customer_client.create_customer(customer_data_dict)
 
-        fetched_customer: dict = get_item(customer_factory.key)
+        fetched_customer: dict = get_item(customer.key)
 
         assert fetched_customer
         fetched_customer.pop("date_created")

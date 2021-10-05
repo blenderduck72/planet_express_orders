@@ -1,9 +1,14 @@
-from pydantic import BaseModel
+from src.models.base_model import DynamoItem
 
 
-class LineItem(BaseModel):
+class LineItem(DynamoItem):
+    _PK_ENTITY: str = "Order"
+    _PK_FIELD: str = "order_id"
+    _SK_ENTITY: str = "LineItem"
+    _SK_FIELD: str = "id"
+
+    description: str
     id: str
     name: str
-    description: str
-    quantity: int
     order_id: str
+    quantity: int

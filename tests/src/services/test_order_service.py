@@ -8,7 +8,6 @@ from pytest import FixtureRequest
 
 
 from src.dynamodb.helpers import get_item, put_item, query_by_key_condition_expression
-from src.factory.model_factory import OrderFactory
 from src.models.order import DynamoOrder, Order, OrderStatus
 from src.services.order_service import OrderService
 from src.services.exceptions import RemoveLineItemException
@@ -27,7 +26,7 @@ class TestOrderService:
 
         assert dynamo_order
         assert isinstance(dynamo_order, DynamoOrder)
-        fetched_order: dict = get_item(OrderFactory.get_models_key(dynamo_order))
+        fetched_order: dict = get_item(dynamo_order.key)
         assert fetched_order
         assert fetched_order["id"]
 

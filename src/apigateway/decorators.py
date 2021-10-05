@@ -7,6 +7,7 @@ from pydantic import BaseModel, ValidationError
 from src.apigateway.responses import HttpResponse
 from src.apigateway.exceptions import UnkownGetItemMethod
 from src.services.base_service import BaseService
+from src.models.base_model import DynamoItem
 
 
 def http_post_request(schema: BaseModel) -> HttpResponse:
@@ -38,7 +39,8 @@ def http_get_pk_sk_from_path_request(
     entity_service: BaseService,
     pk_path_parameter: str,
     sk_path_parameter: str or None = None,
-    get_item_method: str = "get_factory_item_by_key",
+    model: DynamoItem = DynamoItem,
+    get_item_method: str = "get_item_by_key",
 ) -> HttpResponse:
     def decorator(func: Callable):
         @wraps(func)
@@ -53,7 +55,7 @@ def http_get_pk_sk_from_path_request(
                 else None
             )
 
-            key: dict = entity_service.FACTORY.calculate_key(pk_value, sk_value)
+            key: dict = model.calculate_key(pk_value, sk_value)
             service: BaseService = entity_service()
 
             method: Callable = getattr(service, get_item_method, None)
@@ -62,7 +64,7 @@ def http_get_pk_sk_from_path_request(
                     f"Unable to locate {get_item_method} on {entity_service.__name__}"
                 )
 
-            return func(method(key))
+            return func(method(key, model))
 
         return wrapper
 

@@ -4,6 +4,7 @@ from typing import List
 
 from pydantic import BaseModel, Field
 
+from src.models.base_model import DynamoItem
 from src.models.line_item import LineItem
 
 
@@ -25,16 +26,22 @@ class DeliveryAddress(BaseModel):
     zipcode: str
 
 
-class DynamoOrder(BaseModel):
+class DynamoOrder(DynamoItem):
+
+    _PK_ENTITY: str = "Order"
+    _PK_FIELD: str = "id"
+    _SK_ENTITY: str = None
+    _SK_FIELD: str = None
+
     class Config:
         use_enum_value = True
 
-    id: str
     customer_email: str = Field(description="Customer's email.")
     datetime_created: datetime = Field(description="Date the Order is created.")
     delivery_address: DeliveryAddress = Field("Customer's delivery address.")
-    status: OrderStatus = Field(description="Order's current status.")
+    id: str = Field(description="Order id.")
     item_count: int = Field(default=0, description="Total line items in the order")
+    status: OrderStatus = Field(description="Order's current status.")
 
 
 class Order(DynamoOrder):

@@ -5,20 +5,19 @@ import pytest
 from ksuid import ksuid
 
 from src.dynamodb.helpers import put_item
-from src.factory.model_factory import OrderFactory, LineItemFactory
-from src.models import DynamoOrder
+from src.models import DynamoOrder, LineItem
 
 
 @pytest.fixture
 def order_ddb_dict() -> dict:
     id_ksuid: ksuid = ksuid()
-    pk_value: str = f"{OrderFactory.PK_ENTITY}#{str(id_ksuid)}"
+    pk_value: str = f"{DynamoOrder._PK_ENTITY}#{str(id_ksuid)}"
 
     return {
         "pk": pk_value,
         "sk": pk_value,
         "id": str(id_ksuid),
-        "entity": OrderFactory.PK_ENTITY,
+        "entity": DynamoOrder._PK_ENTITY,
         "customer_email": "zapp.brannigan@decomcraticorderofplanets.com",
         "delivery_address": {
             "line1": "471 1st Street Ct",
@@ -83,7 +82,7 @@ def persisted_order_ddb_dict(
 def persisted_dynamo_order(
     persisted_order_ddb_dict: dict,
 ) -> DynamoOrder:
-    return OrderFactory(persisted_order_ddb_dict).model
+    return DynamoOrder(**persisted_order_ddb_dict)
 
 
 @pytest.fixture
@@ -92,8 +91,8 @@ def line_item_ddb_dict(
 ) -> dict:
     return {
         "pk": order_ddb_dict["pk"],
-        "sk": f"{LineItemFactory.SK_ENTITY}#01",
-        "entity": LineItemFactory.SK_ENTITY,
+        "sk": f"{LineItem._SK_ENTITY}#01",
+        "entity": LineItem._SK_ENTITY,
         "id": "01",
         "name": "Popplers",
         "description": "Omicronian enities of small proportions.",

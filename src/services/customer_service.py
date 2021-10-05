@@ -6,7 +6,6 @@ from boto3.dynamodb.conditions import Key
 from ksuid import ksuid
 
 from src.dynamodb.helpers import put_item, query_by_key_condition_expression
-from src.factory.model_factory import AddressFactory, CustomerFactory
 from src.models import Customer, DynamoAddress
 from src.services.base_service import BaseService
 from src.services.exceptions import (
@@ -51,8 +50,6 @@ class CustomerService(BaseService):
 
     """
 
-    FACTORY: CustomerFactory = CustomerFactory
-
     def add_customer_address(
         self,
         username: str,
@@ -73,9 +70,7 @@ class CustomerService(BaseService):
             DuplicateCustomerKeyException (Exception): Occurs if there are multiple of the same username.
         """
         customer_items: List[dict] = query_by_key_condition_expression(
-            key_condition_expression=Key("sk").eq(
-                f"{CustomerFactory.SK_ENTITY}#{username}"
-            )
+            key_condition_expression=Key("sk").eq(f"{Customer._SK_ENTITY}#{username}")
             & Key("pk").begins_with("Customer#"),
             index_name="sk_pk_index",
             table_name=self.TABLE_NAME,
@@ -95,14 +90,14 @@ class CustomerService(BaseService):
         new_address_data["datetime_created"] = address_id.getDatetime().strftime(
             "%Y-%m-%dT%H:%M:%SZ"
         )
-        address_factory: AddressFactory = AddressFactory(new_address_data)
+        address: DynamoAddress = DynamoAddress(**new_address_data)
 
         put_item(
-            item=address_factory.item,
+            item=address.item,
             table_name=self.TABLE_NAME,
         )
 
-        return address_factory.model
+        return address
 
     def create_customer(
         self,
@@ -119,12 +114,12 @@ class CustomerService(BaseService):
             customer (Customer): Pydantic Customer model
         """
         new_customer_data["date_created"] = datetime.now().date().isoformat()
-        customer_factory: CustomerFactory = CustomerFactory(new_customer_data)
+        customer: Customer = Customer(**new_customer_data)
         client = boto3.resource("dynamodb")
         table = client.Table(self.TABLE_NAME)
         try:
             table.put_item(
-                Item=customer_factory.item,
+                Item=customer.item,
                 ConditionExpression="attribute_not_exists(#username)",
                 ExpressionAttributeNames={
                     "#username": "username",
@@ -134,7 +129,7 @@ class CustomerService(BaseService):
         except client.meta.client.exceptions.ConditionalCheckFailedException:
             raise CreateCustomerException("Account already exists")
 
-        return customer_factory.model
+        return customer
 
     def get_customer_by_email(
         self,
@@ -153,15 +148,15 @@ class CustomerService(BaseService):
             CustomerLookupException (Exception): Occurs if username is not saved in DynamoDB
         """
         customer_items: List[dict] = query_by_key_condition_expression(
-            key_condition_expression=Key(f"{CustomerFactory.PK_ENTITY}#{email}")
-            & Key("sk").begins_with(f"{CustomerFactory.SK_ENTITY}#"),
+            key_condition_expression=Key(f"{Customer._PK_ENTITY}#{email}")
+            & Key("sk").begins_with(f"{Customer._SK_ENTITY}#"),
             table_name=self.TABLE_NAME,
         )
 
         if not customer_items:
             raise CustomerLookupException("Unable to locate Customer.")
 
-        return CustomerFactory(customer_items[0]).model
+        return Customer(**customer_items[0])
 
     def get_customer_items_by_email(
         self,
@@ -180,9 +175,7 @@ class CustomerService(BaseService):
             CustomerLookupException (Exception): Occurs if username is not saved in DynamoDB
         """
         customer_items: List[dict] = query_by_key_condition_expression(
-            key_condition_expression=Key("pk").eq(
-                f"{CustomerFactory.PK_ENTITY}#{email}"
-            ),
+            key_condition_expression=Key("pk").eq(f"{Customer._PK_ENTITY}#{email}"),
             table_name=self.TABLE_NAME,
         )
 

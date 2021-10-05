@@ -48,10 +48,6 @@ def main() -> None:
 
         print_request_response(response)
 
-        import pdb
-
-        pdb.set_trace()
-
 
 if __name__ == "__main__":
     main()

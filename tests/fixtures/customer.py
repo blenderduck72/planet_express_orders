@@ -3,20 +3,20 @@ from copy import deepcopy
 
 import pytest
 
-from src.factory.model_factory import CustomerFactory
 from src.dynamodb.helpers import put_item
+from src.models.customer import Customer
 
 
 @pytest.fixture
 def customer_ddb_dict() -> dict:
     return {
-        "pk": f"{CustomerFactory.PK_ENTITY}#zapp.brannigan@decomcraticorderofplanets.com",
-        "sk": f"{CustomerFactory.SK_ENTITY}#VelourFog",
+        "pk": f"{Customer._PK_ENTITY}#zapp.brannigan@decomcraticorderofplanets.com",
+        "sk": f"{Customer._SK_ENTITY}#VelourFog",
         "first_name": "Zapp",
         "last_name": "Brannigan",
         "email": "zapp.brannigan@decomcraticorderofplanets.com",
         "username": "VelourFog",
-        "entity": CustomerFactory.SK_ENTITY,
+        "entity": Customer._SK_ENTITY,
         "date_created": datetime.now().date().isoformat(),
     }
 

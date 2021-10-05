@@ -7,7 +7,6 @@ from src.apigateway.decorators import (
     http_post_request,
 )
 from src.apigateway.responses import HttpResponse
-from src.factory.model_factory import OrderFactory
 from src.models import (
     Customer,
     DynamoAddress,
@@ -111,6 +110,7 @@ def http_create_order(
     entity_service=OrderService,
     pk_path_parameter="order_id",
     get_item_method="get_domain_order_by_key",
+    model=DynamoOrder,
 )
 def http_get_domain_order(
     order: Order,
@@ -126,7 +126,7 @@ def http_add_line_item(new_line_item_data: dict, order_id: str):
     order_client: OrderService = OrderService()
     new_line_item_data["order_id"] = order_id
     line_item: dict = order_client.add_line_item_to_order(
-        order_key=OrderFactory.calculate_key(order_id),
+        order_key=DynamoOrder.calculate_key(order_id),
         new_line_item_data=new_line_item_data,
     )
 

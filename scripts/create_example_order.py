@@ -14,10 +14,11 @@ headers: dict = {
 
 
 @click.command()
-def main() -> None:
+@click.option("-id", "--delivery_address_id")
+def main(delivery_address_id: str) -> None:
     new_order: dict = {
         "customer_email": "philipfry@planetexpress.com",
-        "delivery_address_id": "0de92e53c7902597d4eaccab41dfefbb845f3387",
+        "delivery_address_id": f"{delivery_address_id}",
     }
 
     response: Response = requests.post(

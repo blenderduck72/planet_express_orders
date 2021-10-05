@@ -2,7 +2,6 @@ from copy import deepcopy
 
 import pytest
 import simplejson as json
-from src.factory.model_factory import LineItemFactory
 
 from src.dynamodb.helpers import get_item
 from src.handlers import (
@@ -12,6 +11,7 @@ from src.handlers import (
     http_create_order,
     http_get_domain_order,
 )
+from src.models.line_item import LineItem
 from src.models.order import Order, OrderStatus
 from src.services.order_service import OrderService
 
@@ -217,7 +217,7 @@ class TestHttpAddLineItem:
         assert response["statusCode"] == "201"
         line_item: dict = json.loads(response["body"])
 
-        key: dict = LineItemFactory.calculate_key(
+        key: dict = LineItem.calculate_key(
             persisted_order_ddb_dict["id"],
             line_item["id"],
         )
