@@ -1,5 +1,4 @@
 from src.constants import TABLE_NAME
-from src.factory.item_factory import ItemFactory
 from src.dynamodb.helpers import get_item
 from src.models.base_model import DynamoItem
 
@@ -28,9 +27,7 @@ class BaseService:
     TABLE_NAME = TABLE_NAME
 
     def get_factory_item_by_key(
-        self,
-        key: dict,
-        model: DynamoItem
+        self, key: dict, model: DynamoItem
     ) -> DynamoItem or None:
         """
         Accepts dictionary that describes a DynamoDB key and
