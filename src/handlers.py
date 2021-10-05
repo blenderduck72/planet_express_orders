@@ -7,6 +7,7 @@ from src.apigateway.decorators import (
     http_post_request,
 )
 from src.apigateway.responses import HttpResponse
+from src.factory.model_factory import OrderFactory
 from src.models import (
     Customer,
     DynamoAddress,
@@ -21,7 +22,6 @@ from src.schemas.order import NewOrderSchema
 from src.services.customer_service import CustomerService
 from src.services.exceptions import CreateCustomerException, CustomerLookupException
 from src.services.order_service import OrderService
-from src.dynamodb.ModelFactory import OrderFactory
 
 
 @http_post_request(schema=NewCustomerSchema)

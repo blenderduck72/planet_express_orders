@@ -1,8 +1,6 @@
-from typing import List
-
 from pydantic import BaseModel
 
-from src.dynamodb.ItemFactory import ItemFactory
+from src.factory.item_factory import ItemFactory
 from src.models import (
     Address,
     Customer,

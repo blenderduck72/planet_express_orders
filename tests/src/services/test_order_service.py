@@ -8,8 +8,8 @@ from pytest import FixtureRequest
 
 
 from src.dynamodb.helpers import get_item, put_item, query_by_key_condition_expression
+from src.factory.model_factory import OrderFactory
 from src.models.order import DynamoOrder, Order, OrderStatus
-from src.dynamodb.ModelFactory import OrderFactory
 from src.services.order_service import OrderService
 from src.services.exceptions import RemoveLineItemException
 

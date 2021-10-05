@@ -5,7 +5,7 @@ import pytest
 from boto3.dynamodb.conditions import Key
 
 from src.dynamodb.helpers import get_item, query_by_key_condition_expression
-from src.dynamodb.ModelFactory import CustomerFactory
+from src.factory.model_factory import CustomerFactory
 from src.models.customer import Customer
 from src.services.customer_service import CustomerService
 from src.services.exceptions import CreateCustomerException

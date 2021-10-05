@@ -3,7 +3,7 @@ from copy import deepcopy
 
 import pytest
 
-from src.dynamodb.ModelFactory import CustomerFactory
+from src.factory.model_factory import CustomerFactory
 from src.dynamodb.helpers import put_item
 
 

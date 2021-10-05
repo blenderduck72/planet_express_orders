@@ -1,4 +1,4 @@
-from src.dynamodb.ModelFactory import CustomerFactory
+from src.factory.model_factory import CustomerFactory
 from src.models.customer import Customer
 
 

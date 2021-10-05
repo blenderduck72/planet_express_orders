@@ -2,7 +2,7 @@ from copy import deepcopy
 
 import pytest
 import simplejson as json
-from src.dynamodb.ModelFactory import LineItemFactory
+from src.factory.model_factory import LineItemFactory
 
 from src.dynamodb.helpers import get_item
 from src.handlers import (

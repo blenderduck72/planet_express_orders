@@ -5,7 +5,7 @@ import pytest
 from ksuid import ksuid
 
 from src.dynamodb.helpers import put_item
-from src.dynamodb.ModelFactory import AddressFactory
+from src.factory.model_factory import AddressFactory
 from src.models import AddressType
 
 
