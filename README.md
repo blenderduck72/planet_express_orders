@@ -13,7 +13,8 @@ Provides an example project of utilizing Single Dynamodb Table Design.
         - [Increment a key](#increment-a-key)
         - [De-increment a key](#de-increment-a-key)
     - [Handling Business Logic with ConditionExpressions](#handling-business-logic-with-conditionexpressions)
-
+    - [Handling Uniqueness](#handling-uniqueness)
+- [Recommended Reading](#recommended-reading)
 
 
 # How to try out the project
