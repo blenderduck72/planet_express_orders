@@ -54,19 +54,6 @@ class OrderService(BaseService):
 
         return order_factory.model
 
-    def update_order(
-        self,
-        order_data: dict,
-    ) -> dict:
-        pass
-
-    def update_line_item(
-        self,
-        order_id: str,
-        line_item_id: int,
-    ) -> None:
-        pass
-
     def update_order_address(
         self,
         order_id: str,
