@@ -132,7 +132,7 @@ This can be accomplished because they share the same `pk` value. Between these t
           - AttributeName: sk
             AttributeType: S
 ```
-What can be retrieved by querying the partition key of a composite key introduces an important part of DynamoDB, DomainDrivenDesign, and Microservices: the [Aggregate](https://microservices.io/patterns/data/aggregate.html). In real life multiple entities may make an `order`; for example, `customer`, `recipient`, `address`, `line_item`, `billing`, etc. An `order` would be a composite of all these entities. An example of this in the current project is when a [Domain Order](src/services/order_service.py#L106)
+What can be retrieved by querying the partition key of a composite key introduces an important part of DynamoDB, DomainDrivenDesign, and Microservices: the [Aggregate](https://microservices.io/patterns/data/aggregate.html). In real life multiple entities may make an `order`; for example, `customer`, `recipient`, `address`, `line_item`, `billing`, etc. An `order` would be a composite of all these entities. An example of this in the current project is when a [Domain Order](src/services/order_service.py#L128)
 
 To get a specific `line_item` or `order` the boto3's `get_item` method can still be used. Or a list of a specific items that creates an `order` can be retrieved by an updated query. If we wanted to retrieve just an `order`'s `line_items` we could update our `KeyConditionExpression` to:
 ```python
@@ -203,7 +203,7 @@ new_line_item_data["order_id"] new_line_item_data["pk"].replace(
 )
 table.put_item(Item=new_line_item_data)
 ```
-Though this technique may raise some questions this is the standard technique for this practice. An example of this in the codebase can be found [here](src/services/order_service.py#L132)
+Though this technique may raise some questions this is the standard technique for this practice. An example of this in the codebase can be found [here](src/services/order_service.py#L68)
 
 ### De-increment a key
 Oddly, the technique for subtracting from `item_count` when a `line_item` feels more practical.
@@ -251,7 +251,7 @@ client.meta.client.transact_write_items(
 ```
 By bundling up the Delete and Update expression in the `transact_write_items` method we ensure that if one item fails due to a condition check not changes are made to any item. If one failes they all fail.
 
-An example of this can be found [here](src/services/order_service.py#L154).
+An example of this can be found [here](src/services/order_service.py#L232).
 
 ## Handling Business Logic with ConditionExpressions
 As seen with the De-increment a key example, ConditionExpressions are a strong tool for adding, implementing, or enforcing Business Logic to the saving or updating of certain attributes. 
@@ -286,7 +286,7 @@ table.put_item(
 ```
 If the following customer was already saved in DynamoDB when this operation is performed, boto3 would raise a `ConditionalCheckFailedException`.
 
-An example of this in practice can be found [here](src/services/customer_service.py#L22).
+An example of this in practice can be found [here](src/services/customer_service.py#L100).
 
 # Recommended Reading
 - The Alex Debrie Collection:

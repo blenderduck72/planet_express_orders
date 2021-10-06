@@ -8,6 +8,43 @@ class DynamoItem(BaseModel):
     _SK_ENTITY: str
     _SK_FIELD: str
 
+    """
+    Represents a DynamoItem
+
+    ...
+
+    Attributes
+    ----------
+    _PK_ENTITY : str
+        Entity name of the Partition Key.
+    _PK_FIELD : str
+        Field with a value used to form a Partition Key.
+    _SK_ENTITY : str
+        Entity name of the Sort Key.
+    _SK_FIELD: str
+        Field with a value used to form the Sort Key.
+
+
+    Methods
+    -------
+    entity() -> str
+        Returns the model's calculated entity.
+
+    key() -> str
+        Returns the calculated key of the model.
+
+    pk() -> str
+        Returns the calculated Partition Key.
+
+    sk() -> str
+        Returns the calcualted Sort Key.
+
+    Class Methods
+    -------
+    calculate_key(pk_value: str, sk_value: str) -> dict
+        Accepts two values and returns a calculated DynamoDB key.
+    """
+
     @property
     def entity(self) -> str:
         """
@@ -18,6 +55,17 @@ class DynamoItem(BaseModel):
             return self._SK_ENTITY
 
         return self._PK_ENTITY
+
+    @property
+    def key(self) -> dict:
+        """
+        Returns:
+            key (dict) : Calcuated DynamoDB Key Dictionary.
+        """
+        return {
+            "pk": self.pk,
+            "sk": self.sk,
+        }
 
     @property
     def pk(self) -> str:
@@ -45,17 +93,6 @@ class DynamoItem(BaseModel):
             if self._SK_ENTITY
             else self.pk
         )
-
-    @property
-    def key(self) -> dict:
-        """
-        Returns:
-            key (dict) : Calcuated DynamoDB Key Dictionary.
-        """
-        return {
-            "pk": self.pk,
-            "sk": self.sk,
-        }
 
     @property
     def item(self) -> dict:

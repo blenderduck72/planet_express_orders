@@ -17,17 +17,17 @@ class BaseService:
 
     Methods
     -------
-    get_factory_item_by_key(key: dict) -> DynamoItem
+    get_item_by_key(key: dict, model: DynamoItem) -> DynamoItem
         Retrieves a specific DynamoDB item and returns a
-        DynamoItem
-
-
+        instantiated DynamoItem
     """
 
     TABLE_NAME = TABLE_NAME
 
-    def get_factory_item_by_key(
-        self, key: dict, model: DynamoItem
+    def get_item_by_key(
+        self,
+        key: dict,
+        model: DynamoItem,
     ) -> DynamoItem or None:
         """
         Accepts dictionary that describes a DynamoDB key and

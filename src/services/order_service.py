@@ -25,17 +25,15 @@ class OrderService(BaseService):
 
     Attributes
     ----------
-    FACTORY : OrderFactory
-        ItemFactory used by obtain root Model's Key
     TABLE_NAME: str
         DynamoDB Table Name utilized by service.
 
 
     Methods
     -------
-    get_factory_item_by_key(key: dict) -> ItemFactory
-        Retrieves a specific DynamoDB item and returns it
-        wrapped in an ItemFactory
+    get_item_by_key(key: dict, model: DynamoItem) -> DynamoItem
+        Retrieves a specific DynamoDB item and returns a
+        instantiated DynamoItem
 
     add_line_item_to_order(order_key: dict, new_line_item_data: dict) -> dict
         Adds a LineItem to an Order.
@@ -53,8 +51,6 @@ class OrderService(BaseService):
         Order and return the list or utilize the list to instantiate a
         pydantic Order.
 
-    get_order_key_from_id(id: str) -> dict
-        Calculates and returns what should be a LineItem's dynamodb key.
 
     get_order_item_by_id(id: str, deserialize: bool = True) -> dict or DynamoOrder or None
         Returns an Order from its id as either a dict or instantiated
@@ -109,8 +105,14 @@ class OrderService(BaseService):
         new_order_data: dict,
     ) -> DynamoOrder:
         """
-        Accpets a new Order payload and creates a new
-        Order if the payloads
+        Accepts a new order payload and creates a new
+        order.
+
+        Parameters:
+            new_order_data (dict): Dictionary of customer data (NewOrderSchema).
+
+        Returns:
+            order (DynamoOrder): Pydantic DynamoOrder model
         """
         id: ksuid = ksuid()
         new_order_data["id"] = str(id)
@@ -118,7 +120,6 @@ class OrderService(BaseService):
             "%Y-%m-%dT%H:%M:%SZ"
         )
         new_order_data["status"] = OrderStatus.NEW
-        client = boto3.resource("dynamodb")
         order: DynamoOrder = DynamoOrder(**new_order_data)
         put_item(order.item, self.TABLE_NAME)
 
@@ -133,7 +134,18 @@ class OrderService(BaseService):
             Key("pk").eq(f"{DynamoOrder._PK_ENTITY}#{id}"),
             table_name=self.TABLE_NAME,
         )
+        """
+        Return an aggregate List of Dictionary items that make up a
+        Domain Order, or an instantiated Order.
 
+        Parameters:
+            id (str): Order id to retrieve.
+            deserialize (bool): Indicates whether a Dicationary or Order should be returned.
+
+        Returns:
+            order (DyanmoOrder): Pydantic DynamoOrder model
+            order (List[dict]): A list of Dictionary items that compose an Order
+        """
         if not items:
             return None
 
@@ -159,25 +171,37 @@ class OrderService(BaseService):
         key: dict,
         *args,
     ) -> Order:
+        """
+        Returns an instantiated Order.
 
+        Parameters:
+            key (dict): Order id to retrieve.
+
+        Returns:
+            order (DyanmoOrder): Pydantic DynamoOrder model
+        """
         return self.get_domain_order_by_id(
             key["pk"].replace(f"{DynamoOrder._PK_ENTITY}#", "")
         )
-
-    @classmethod
-    def get_order_key_from_id(
-        cls,
-        id: str,
-    ) -> dict:
-        pk_value: str = f"{DynamoOrder._PK_ENTITY}#{id}"
-        return {"pk": pk_value, "sk": pk_value}
 
     def get_order_item_by_id(
         self,
         id,
         deserialize=True,
     ) -> dict or DynamoOrder or None:
+        """
+        Returns a Dictionary items that make up a
+        Domain Order, or an instantiated Order.
 
+        Parameters:
+            id (str): Order id to retrieve.
+            deserialize (bool): Indicates whether a Dicationary or Order should be returned.
+
+        Returns:
+            order (DyanmoOrder): Pydantic DynamoOrder model
+            order (List[dict]): A list of Dictionary items that compose an Order
+            none (None): Returned if no Order is found.
+        """
         return self.get_order_item_by_key(
             key=DynamoOrder.calculate_key(id),
             deserialize=deserialize,
@@ -186,6 +210,19 @@ class OrderService(BaseService):
     def get_order_item_by_key(
         self, key: dict, deserialize=True
     ) -> dict or DynamoOrder or None:
+        """
+        Returns a Dictionary item that makes up a
+        a DynamoOrder, or an instantiated DynamoOrder.
+
+        Parameters:
+            key (dict): Dictionary that represents a DynamoDB key.
+            deserialize (bool): Indicates whether a Dicationary or DynamoItem should be returned.
+
+        Returns:
+            order (DyanmoOrder): Pydantic DynamoOrder model
+            order (List[dict]): A Dictionary item that composes a DynamoOrder
+            none (None): Returned if no Order is found.
+        """
         item: dict = get_item(key, self.TABLE_NAME)
         if not deserialize or not item:
             return item
@@ -197,7 +234,20 @@ class OrderService(BaseService):
         order_id: str,
         line_item_id: int,
     ) -> None:
-        order_key: dict = self.get_order_key_from_id(order_id)
+        """
+        Removes a LineItem from an Order.
+
+        Parameters:
+            order_id (dict): id of the Order.
+            line_item_id (int): id of the LineItem to remove.
+
+        Returns:
+            None
+
+        Raises:
+            RemoveLineItemException.
+        """
+        order_key: dict = DynamoOrder.calculate_key(order_id)
         line_item_key: dict = LineItem.calculate_key(order_id, line_item_id)
 
         client = boto3.resource("dynamodb").Table(self.TABLE_NAME)

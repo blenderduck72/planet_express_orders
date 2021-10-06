@@ -23,17 +23,15 @@ class CustomerService(BaseService):
 
     Attributes
     ----------
-    FACTORY : CustomerFactory
-        ItemFactory used by obtain root Model's Key
     TABLE_NAME: str
         DynamoDB Table Name utilized by service.
 
 
     Methods
     -------
-    get_factory_item_by_key(key: dict) -> ItemFactory
-        Retrieves a specific DynamoDB item and returns it
-        wrapped in an ItemFactory
+    get_item_by_key(key: dict, model: DynamoItem) -> DynamoItem
+        Retrieves a specific DynamoDB item and returns a
+        instantiated DynamoItem
 
     create_customer(new_customer_data: dict)
         Saves a new customer to DynamoDB

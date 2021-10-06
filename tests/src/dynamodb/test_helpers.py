@@ -6,7 +6,6 @@ from boto3.dynamodb.conditions import Key
 from src.constants import TABLE_NAME
 from src.dynamodb.helpers import (
     get_item,
-    get_items_by_query,
     put_item,
     query_by_key_condition_expression,
 )
@@ -45,23 +44,6 @@ class TestGetItem:
 
         assert item
         assert item == persisted_order_ddb_dict
-
-
-class TestGetItemsByQuery:
-    def test_get_items_by_query_gets_item(
-        self,
-        persisted_order_ddb_dict: dict,
-    ) -> None:
-        items: List[dict] = get_items_by_query(
-            key={
-                "pk": persisted_order_ddb_dict["pk"],
-                "sk": persisted_order_ddb_dict["sk"],
-            }
-        )
-
-        assert items
-        assert isinstance(items, list)
-        assert persisted_order_ddb_dict in items
 
 
 class TestQueryByKeyConditionExpression:

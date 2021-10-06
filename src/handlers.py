@@ -59,7 +59,18 @@ def http_add_address_to_customer(
     new_address_data: dict,
     username: str,
 ) -> HttpResponse:
+    """
+    Accepts a Dictionary formatted in the NewAddressSchema.
 
+        Parameters:
+            new_address_data (dict): Dictionary dump of NewAddressSchema Pydantic Model.
+
+        Returns:
+            HttpResponse (HttpResponse): Response of 201 for newly created address.
+
+        Raises:
+            CustomerLookupException
+    """
     try:
         customer_client: CustomerService = CustomerService()
         address: DynamoAddress = customer_client.add_customer_address(
@@ -76,7 +87,18 @@ def http_add_address_to_customer(
 def http_create_order(
     new_order_data: dict,
 ) -> HttpResponse:
+    """
+    Accepts a Dictionary formatted in the NewOrderSchema.
 
+        Parameters:
+            new_order_data (dict): Dictionary dump of NewOrderSchema Pydantic Model.
+
+        Returns:
+            HttpResponse (HttpResponse): Response of 201 for newly created Order.
+
+        Raises:
+            CustomerLookupException
+    """
     try:
         customer_client: CustomerService = CustomerService()
         customer_items: List[dict] = customer_client.get_customer_items_by_email(
@@ -115,6 +137,16 @@ def http_create_order(
 def http_get_domain_order(
     order: Order,
 ) -> HttpResponse:
+    """
+    Accepts a Domain Order Pydantic Model.
+
+        Parameters:
+            new_order_data (dict): Dictionary dump of NewOrderSchema Pydantic Model.
+
+        Returns:
+            HttpResponse (HttpResponse): Response of 200 for retrieved Order.
+
+    """
     return HttpResponse(
         status_code=200,
         body=order.json(),
@@ -122,7 +154,23 @@ def http_get_domain_order(
 
 
 @http_post_request(schema=NewLineItemSchema)
-def http_add_line_item(new_line_item_data: dict, order_id: str):
+def http_add_line_item(
+    new_line_item_data: dict,
+    order_id: str,
+) -> HttpResponse:
+    """
+    Accepts a Dictionary formatted in the NewLineItemSchema, and related order_id.
+
+        Parameters:
+            order-id (str): Id of the order to add a LineItem to.
+            new_order_data (dict): Dictionary dump of NewLineItemSchema Pydantic Model.
+
+        Returns:
+            HttpResponse (HttpResponse): Response of 201 for newly created LineItem.
+
+        Raises:
+            CustomerLookupException
+    """
     order_client: OrderService = OrderService()
     new_line_item_data["order_id"] = order_id
     line_item: dict = order_client.add_line_item_to_order(
