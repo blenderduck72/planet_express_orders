@@ -12,6 +12,8 @@ click = "*"
 pytest-freezegun = "*"
 requests = "*"
 python-dotenv = "*"
+mypy = "*"
+mypy-boto3-dynamodb = "*"
 
 [dev-packages]
 pytest = "*"

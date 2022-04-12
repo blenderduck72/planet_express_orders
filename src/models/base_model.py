@@ -27,21 +27,21 @@ class DynamoItem(BaseModel):
 
     Methods
     -------
-    entity() -> str
+    entity() -> str:
         Returns the model's calculated entity.
 
-    key() -> str
+    key() -> str:
         Returns the calculated key of the model.
 
-    pk() -> str
+    pk() -> str:
         Returns the calculated Partition Key.
 
-    sk() -> str
+    sk() -> str:
         Returns the calcualted Sort Key.
 
     Class Methods
     -------
-    calculate_key(pk_value: str, sk_value: str) -> dict
+    calculate_key(pk_value: str, sk_value: str) -> dict:
         Accepts two values and returns a calculated DynamoDB key.
     """
 

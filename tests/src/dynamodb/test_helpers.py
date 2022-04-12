@@ -2,6 +2,7 @@ from typing import List
 
 import boto3
 from boto3.dynamodb.conditions import Key
+from mypy_boto3_dynamodb.service_resource import _Table
 
 from src.constants import TABLE_NAME
 from src.dynamodb.helpers import (
@@ -18,7 +19,7 @@ class TestPutItem:
     ) -> None:
         put_item(order_ddb_dict)
 
-        table = boto3.resource("dynamodb").Table(TABLE_NAME)
+        table: _Table = boto3.resource("dynamodb").Table(TABLE_NAME)
         response: dict = table.get_item(
             Key={
                 "pk": order_ddb_dict["pk"],

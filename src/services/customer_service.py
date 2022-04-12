@@ -4,6 +4,7 @@ from typing import List
 import boto3
 from boto3.dynamodb.conditions import Key
 from ksuid import ksuid
+from mypy_boto3_dynamodb.service_resource import _Table
 
 from src.dynamodb.helpers import put_item, query_by_key_condition_expression
 from src.models import Customer, DynamoAddress
@@ -113,8 +114,8 @@ class CustomerService(BaseService):
         """
         new_customer_data["date_created"] = datetime.now().date().isoformat()
         customer: Customer = Customer(**new_customer_data)
-        client = boto3.resource("dynamodb")
-        table = client.Table(self.TABLE_NAME)
+        client: _Table = boto3.resource("dynamodb")
+        table: _Table = client.Table(self.TABLE_NAME)
         try:
             table.put_item(
                 Item=customer.item,

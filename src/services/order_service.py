@@ -4,6 +4,7 @@ from typing import List
 import boto3
 from boto3.dynamodb.conditions import Key
 from ksuid import ksuid
+from mypy_boto3_dynamodb.service_resource import _Table
 
 from src.dynamodb.helpers import get_item, put_item, query_by_key_condition_expression
 from src.models import (
@@ -12,7 +13,6 @@ from src.models import (
     Order,
     OrderStatus,
 )
-from src.models.address import DynamoAddress
 from src.services.base_service import BaseService
 from src.services.exceptions import RemoveLineItemException
 
@@ -81,7 +81,7 @@ class OrderService(BaseService):
         Returns:
             line_item_dict (dict): A Dictionary that represents the saved LineItem.
         """
-        table = boto3.resource("dynamodb").Table(self.TABLE_NAME)
+        table: _Table = boto3.resource("dynamodb").Table(self.TABLE_NAME)
 
         response: dict = table.update_item(
             Key=order_key,
@@ -250,7 +250,7 @@ class OrderService(BaseService):
         order_key: dict = DynamoOrder.calculate_key(order_id)
         line_item_key: dict = LineItem.calculate_key(order_id, line_item_id)
 
-        client = boto3.resource("dynamodb").Table(self.TABLE_NAME)
+        client: _Table = boto3.resource("dynamodb").Table(self.TABLE_NAME)
 
         try:
             client.meta.client.transact_write_items(

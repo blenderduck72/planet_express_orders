@@ -112,7 +112,7 @@ and one for a line_item:
 Though seperate entities, that can be be obtained via one query:
 ```python
 
-table = boto3.resource('dynamodb').Table('table_name')
+table: _Table = boto3.resource('dynamodb').Table('table_name')
 table.query(KeyConditionExpression=Key('pk').eq('Order#0de9302cfae9a312bfefa4f542d41c04e03ee455'))
 ```
 This can be accomplished because they share the same `pk` value. Between these two entities the `sk` value is what makes them unique (yes the `order`'s pk and sk value are the same, this is by design). This is allowed to happen because a composity key was defined when the table was created:
@@ -180,7 +180,7 @@ The `order` update may look like:
 ```python
 import boto3
 
-table = boto3.resource("dynamodb").Table(self.TABLE_NAME)
+table: _Table = boto3.resource("dynamodb").Table(self.TABLE_NAME)
 response: dict = table.update_item(
     Key={
         "pk":"Order#0de9302cfae9a312bfefa4f542d41c04e03ee455", 
@@ -214,7 +214,7 @@ Sadly boto3 does not have this method directly on a `resource` item, which means
 ```python
 import boto3
 
-client = boto3.resource("dynamodb").Table("planet_express_table")
+client: _Table = boto3.resource("dynamodb").Table("planet_express_table")
 client.meta.client.transact_write_items(
     TransactItems=[
         {
@@ -266,7 +266,7 @@ Assume that we have do not want to create a customer that already exists in our 
 We can prevent overwriting or adding a new customer if there is an exising `username` utilizing dynamodb's ConditionExpression and the `attribute_not_exists` method.
 
 ```python
-table = boto3.resource("dynamodb").Table("table_name")
+table: _Table = boto3.resource("dynamodb").Table("table_name")
 table.put_item(
     Item={
         "pk": "Customer#philipfry@planetexpress.com",

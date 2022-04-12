@@ -1,5 +1,3 @@
-from copy import deepcopy
-from re import L
 from typing import List
 
 from boto3.dynamodb.conditions import Key
@@ -81,7 +79,7 @@ class TestOrderService:
     ) -> None:
         expected_value = request.getfixturevalue(expected_result)
         client: OrderService = OrderService()
-        response = client.get_order_item_by_id(
+        response: dict = client.get_order_item_by_id(
             persisted_order_ddb_dict["id"],
             deserialize,
         )
